@@ -3,7 +3,7 @@
 # Eliot Forcadell
 # 2022/09/13
 #########################################################
-
+install.packages("pacman")
 pacman::p_load(shiny, shinyjs, shinyWidgets, DT, yaml,
                htmltools, rvest, httr, RSelenium, curl,
                data.table, stringr, lubridate, tools,
