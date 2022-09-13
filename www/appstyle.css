@@ -1,0 +1,410 @@
+:root {
+  --theme_color: #eea236;
+}
+
+@font-face {  
+  src: url(Powerpuff.otf);
+  font-family: "Powerpuff";
+}
+
+body {
+  width: 90%;
+  margin-top: 0px;
+  margin-bottom: 50px;
+  margin-left: 50px;
+  margin-right: 50px;
+}
+
+/*.btn-default.focus, .btn-default:focus {
+    background-color: transparent;
+}*/
+
+.orange-btn {
+    color: #fff;
+    /*background-color: #f0ad4e;*/
+    background-color: var(--theme_color);
+    border-color: var(--theme_color);
+}
+
+.orange-btn.focus, .orange-btn:focus {
+    color: #fff;
+    background-color: var(--theme_color);
+    border-color: var(--theme_color);
+}
+
+.orange-btn.hover, .orange-btn:hover {
+    color: #fff;
+    background-color: #ec971f;
+    border-color: #d58512;
+}
+
+a {
+  color: var(--theme_color) !important;
+  text-decoration: none;
+
+  &:hover,
+  &:focus {
+    color: @link-hover-color;
+    text-decoration: @link-hover-decoration;
+  }
+
+  &:focus {
+    .tab-focus();
+  }
+}
+
+.radio-info input[type="radio"]:checked + label::before {
+  border-color: var(--theme_color);
+}
+
+.radio-info input[type="radio"]:checked + label::after {
+  background-color: var(--theme_color);
+}
+
+.checkbox-info input[type="checkbox"]:checked + label::before, 
+.checkbox-info input[type="radio"]:checked + label::before {
+  background-color: var(--theme_color);
+  border-color: var(--theme_color);
+}
+
+span input[type="text"]:focus {
+  border-color: red !important;
+  /*outline: 0;*/
+  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px red !important;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px red !important;
+}  
+
+h2 {
+  text-align: center;
+  font-family: Powerpuff;
+  font-size: 45px;
+}
+
+/*input[type="checkbox"], input[type="radio"] {
+    accent-color: #fed348;
+}*/
+
+.error {
+  color: red;
+}
+
+.success {
+  color: green;
+}
+
+
+#side-panel {
+  margin-top: 15px;
+  padding-left: 0px;
+  width: 20%;
+}
+
+#side-panel .well {
+    margin-right: 15px;
+    /*padding-bottom: 31px;*/
+}
+
+#isbn-label {
+  margin-bottom: 6px;
+}
+
+#loadmessage {
+    padding-left: 10px;
+    padding-top: 7px;
+}
+
+#smallerloadmessage {
+    font-size: 10px;
+    padding-left: 10px;
+    padding-top: 10px;
+}
+
+div[data-value=ajouter] > div.container-fluid {
+  padding-left: 0px;
+  padding-right: 30px;
+}
+
+#imageDiv, #edit_imageDiv {
+    padding-left: 7px;
+}
+
+#imageSubDiv, #edit_imageSubDiv {
+    padding-right: 15px;
+    text-align: center;
+}
+    
+
+/*#edit_imageDiv {
+    padding-left: 50px;
+}*/
+
+#coverImage, #edit_coverImage {
+  height: 196px;
+  /*text-align: center;*/
+  margin-top: 16.5px;
+  margin-bottom: 16.5px;
+}
+
+/*.cover-layout {
+  width: 183px;
+  /*margin: auto;*/
+}*/
+
+#coverImageInput .input-group, #edit_coverImageInput .input-group {
+  /*width: 75%;*/
+  margin: auto;
+}
+
+.cover-layout span {
+  padding: 4px 4px;
+}
+
+.cover-layout img {
+  height: 24px;
+}
+
+#edit_imageDiv .cover-layout {
+  padding-left: 10px;
+}
+
+#coverImageInput_progress, #edit_coverImageInput_progress {
+/*  width: 82%;
+  float: right;*/
+  margin-top: 5px;
+}
+
+#coverImageInput_progress .progress-bar, #edit_coverImageInput_progress .progress-bar {
+  /*background-color: var(--theme_color);*/
+  background-color: black;
+}
+
+#resetupload_button, #edit_resetupload_button {
+/*  color: white;
+  background-color: black;*/
+  height: 34px;
+  width: 30px;
+  padding: 5px;
+  /*font-size: 12px;*/
+}
+
+#read {
+  padding-left: 5px;
+}
+
+.shiny-split-layout > div {
+  overflow: visible;
+}
+
+
+#auteuricesMainDiv, #traducteuricesMainDiv, #interpretesMainDiv {
+  padding-bottom: 10px;
+}
+
+#auteuricesMainDiv button, 
+#traducteuricesMainDiv button,
+#interpretesMainDiv button{
+  width: 15px;
+  height: 15px;
+  font-size: 12px;
+  line-height: 50%;
+  margin-left: 2px;
+  padding-top:0px;
+  padding-bottom:1px;
+  padding-left:0px;
+  padding-right:0px;
+}
+
+.autandtrad {
+  /*border: 0px;*/
+  font-weight: 800;
+}
+
+
+
+#auteuricesSubDiv, #traducteuricesSubDiv {
+  padding-top: 10px;
+}
+
+#interpretesRow {
+    padding-top: 10px;
+}
+
+.totrad {
+  margin-left: -18px !important;
+  margin-top: -7px !important;
+  font-size: 10px !important;
+/*  font-weight: 400 !important;
+  font-size: 10px !important;
+  color: #333 !important;
+  background-color: #fff !important;
+  border-color: #ccc !important;*/
+}
+
+#lu-label {
+  margin-bottom: 20px;
+}
+
+#bottom-row.row {
+  padding-top: 25px;
+}
+
+
+
+#add_button {
+  float: right;
+}
+
+#select_cols {
+  margin-top: 20px;
+}
+
+#selcols-row {
+  margin-top: 35px;
+}
+
+#table_div {
+  margin: auto;
+  width: 98%;
+}
+
+#table_div > .row {
+  margin-top: 5px;
+}
+
+/*.dtsb-title {
+  font-weight: bold;
+}
+
+.dtsb-titleRow {
+  margin-bottom: 0px !important;
+}
+
+div.dtsb-criteria select, .dtsb-value {
+  border-color: #ccc !important;
+}*/
+
+.edit_row {
+  margin-top: 20px;
+}
+
+#edit_imageDiv {
+  margin-top: 18px;
+}
+
+#edit_genders {
+    margin-top: 25px;
+    margin-bottom: 25px;
+}
+
+.col-sm-2:has(#edit_read_deb_date) {
+  padding-right: 0px;
+}
+
+.col-sm-2:has(#edit_read) {
+  padding-left: 0px;
+}
+
+.table.dataTable tbody td.active, .table.dataTable tbody tr.active td {
+	background-color: var(--theme_color) !important;
+	color: white;
+}
+
+.active > a, .active > span {
+  z-index: 3;
+  color: white !important;
+  cursor: default;
+  background-color: var(--theme_color) !important;
+  border-color: var(--theme_color) !important;
+}
+
+
+
+div[data-value=stats] .well, div[data-value=pref] .well {
+  margin-top: 15px;
+  margin-left: 15px;
+  margin-right: 15px;
+}
+
+div[data-value=stats] .tab-content {
+  margin-top: 15px;  
+}
+
+#plot_count {
+    margin-top: 15px;
+}
+
+#select_cat_row {
+    margin-bottom: 25px;
+}
+
+#select_cat_row .shiny-input-container {
+/*div[data-value=stats_bycat] .shiny-input-container {*/
+    margin: 15px auto;
+}
+
+#cat_onlyread .shiny-options-group {
+    margin-left: 35px;
+    margin-bottom: 25px;
+}
+
+#cat_read_date, #set_cat_row .awesome-checkbox {
+    margin-left: 35px;
+}
+
+#minpagesImage, #maxpagesImage {
+    text-align: center;
+}
+
+.toppages-col div {
+    text-align: center;
+}
+
+.toppages-label {
+    margin-top: 10px;
+}
+
+
+
+
+div[data-value=pref] h3 {
+  margin-bottom: 25px;
+}
+
+div[data-value=pref] h4 {
+  margin-top: 50px;
+  margin-bottom: 25px;
+}
+
+#select_newdefcols .form-group {
+  margin-top: 15px;
+}
+
+#change_defcols_button {
+  margin-top: 15px;
+}
+
+#change_default_button, 
+#add_choice_button {
+  margin-top: 25px;
+  margin-left: 15px;
+}
+
+#newdefvalueMessage {
+  padding-left: 20px;
+}
+
+#newdefcolsMessage {
+  margin-top: 22px;
+}
+
+#newchoiceError {
+  margin-top: 5px;
+}
+
+#set_pageLength .selectize-control {
+    width: 50%;
+}
+
+#set_isbnCase .selectize-control {
+    width: 50%;
+}
