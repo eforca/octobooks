@@ -1,9 +1,9 @@
 #########################################################
-# Octobooks 1.0
+# Octobooks 1.0.1
 # Eliot Forcadell
 # 2022/09/13
 #########################################################
-
+if (!require("pacman")) install.packages("pacman"); library(pacman)
 pacman::p_load(shiny, shinyjs, shinyWidgets, DT, yaml,
                htmltools, rvest, httr, RSelenium, curl,
                data.table, stringr, lubridate, tools,
@@ -72,7 +72,7 @@ if (!file.exists("data/octobooks.csv")) {
                       keywords = character(), 
                       cover = logical()),
            "data/octobooks.csv")
-} 
+}
 
 # Sauvegarde de la base si nécessaire
 if (!file.exists("data/backups")) dir.create("data/backups")
@@ -107,9 +107,10 @@ books <- fread("data/octobooks.csv", integer64 = "character",
                                              "owner", "read", "keywords"),
                                  integer=c("pub_date", "edition_date", "pages", 
                                            "duree_h", "duree_min"),
-                                 POSIXct=c("read_deb_date", "read_fin_date"),
+                                 # POSIXct=c("read_deb_date", "read_fin_date"),
                                  logical=c("cover")))
-
+books[, read_deb_date := as.POSIXct(read_deb_date, tz = "GMT")]
+books[, read_fin_date := as.POSIXct(read_fin_date, tz = "GMT")]
 
 
 # setcolorder(books, neworder = c("isbn", "title", "authors", "translators", "interpreters",
@@ -348,10 +349,10 @@ ui <- fluidPage(
                             # Messages d'erreur et bouton ajouter
                             fluidRow(
                                 id = "bottom-row",
-                                column(9,
+                                column(8,
                                        div(id = "addMessage")
                                 ),
-                                column(3,
+                                column(4,
                                        actionButton(inputId = "reinit_button", 
                                                     label = "Réinitialiser"),
                                        actionButton(inputId = "add_button", 
@@ -2079,16 +2080,18 @@ server <- function(input, output, session) {
                 paste(code_genders[str_split(x, ";")[[1]]], collapse = ", ")})]
         }
         
-        dtplot %>%
-            ggplot(aes(x = "", y = p, fill = get(sel_cat))) +
-            geom_bar(stat = "identity", width = 1) +
-            scale_fill_brewer("", palette = "Pastel1") +
-            coord_polar("y", start = 0) +
-            geom_text(aes(label = paste0(round(p*100), "%")),
-                      position = position_stack(vjust = 0.5),
-                      size = 5) +
-            theme_void() +
-            theme(text = element_text(size = 16))
+        if (nrow(dtplot)) {
+            dtplot %>%
+                ggplot(aes(x = "", y = p, fill = get(sel_cat))) +
+                geom_bar(stat = "identity", width = 1) +
+                scale_fill_brewer("", palette = "Pastel1") +
+                coord_polar("y", start = 0) +
+                geom_text(aes(label = paste0(round(p*100), "%")),
+                          position = position_stack(vjust = 0.5),
+                          size = 5) +
+                theme_void() +
+                theme(text = element_text(size = 16))
+        }
     })
     
     observeEvent(input$cat_onlyread, {
