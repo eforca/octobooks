@@ -2080,16 +2080,18 @@ server <- function(input, output, session) {
                 paste(code_genders[str_split(x, ";")[[1]]], collapse = ", ")})]
         }
         
-        dtplot %>%
-            ggplot(aes(x = "", y = p, fill = get(sel_cat))) +
-            geom_bar(stat = "identity", width = 1) +
-            scale_fill_brewer("", palette = "Pastel1") +
-            coord_polar("y", start = 0) +
-            geom_text(aes(label = paste0(round(p*100), "%")),
-                      position = position_stack(vjust = 0.5),
-                      size = 5) +
-            theme_void() +
-            theme(text = element_text(size = 16))
+        if (nrow(dtplot)) {
+            dtplot %>%
+                ggplot(aes(x = "", y = p, fill = get(sel_cat))) +
+                geom_bar(stat = "identity", width = 1) +
+                scale_fill_brewer("", palette = "Pastel1") +
+                coord_polar("y", start = 0) +
+                geom_text(aes(label = paste0(round(p*100), "%")),
+                          position = position_stack(vjust = 0.5),
+                          size = 5) +
+                theme_void() +
+                theme(text = element_text(size = 16))
+        }
     })
     
     observeEvent(input$cat_onlyread, {
