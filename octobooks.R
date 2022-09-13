@@ -72,7 +72,7 @@ if (!file.exists("data/octobooks.csv")) {
                       keywords = character(), 
                       cover = logical()),
            "data/octobooks.csv")
-} 
+}
 
 # Sauvegarde de la base si nécessaire
 if (!file.exists("data/backups")) dir.create("data/backups")
@@ -107,9 +107,10 @@ books <- fread("data/octobooks.csv", integer64 = "character",
                                              "owner", "read", "keywords"),
                                  integer=c("pub_date", "edition_date", "pages", 
                                            "duree_h", "duree_min"),
-                                 POSIXct=c("read_deb_date", "read_fin_date"),
+                                 # POSIXct=c("read_deb_date", "read_fin_date"),
                                  logical=c("cover")))
-
+books[, read_deb_date := as.POSIXct(read_deb_date, tz = "GMT")]
+books[, read_fin_date := as.POSIXct(read_fin_date, tz = "GMT")]
 
 
 # setcolorder(books, neworder = c("isbn", "title", "authors", "translators", "interpreters",
