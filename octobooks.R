@@ -348,10 +348,10 @@ ui <- fluidPage(
                             # Messages d'erreur et bouton ajouter
                             fluidRow(
                                 id = "bottom-row",
-                                column(9,
+                                column(8,
                                        div(id = "addMessage")
                                 ),
-                                column(3,
+                                column(4,
                                        actionButton(inputId = "reinit_button", 
                                                     label = "Réinitialiser"),
                                        actionButton(inputId = "add_button", 
