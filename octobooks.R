@@ -171,7 +171,7 @@ ui <- fluidPage(
                  value = "ajouter",
                  fluidPage(
                      
-                     column(2,
+                     column(3,
                             id = "side-panel",
                             
                             # Panel ISBN
@@ -206,7 +206,7 @@ ui <- fluidPage(
                      ),
                      
                      # Panel central
-                     column(8,
+                     column(9,
                             id = "add-panel",
                             
                             fluidRow(
@@ -273,7 +273,7 @@ ui <- fluidPage(
                                                ),
                                                disabled(actionButton(inputId = "resetupload_button", 
                                                                      label = "x")),
-                                               cellWidths = c("80%", "15%")
+                                               cellWidths = c("185px", "30px")
                                            ))
                                 ),
                             ),
