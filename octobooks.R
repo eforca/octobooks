@@ -1170,63 +1170,75 @@ server <- function(input, output, session) {
                     print("Trying Worldcat for cover")
                     shinyjs::html(id = "smallerloadmessage", "Trying Worldcat for cover...")
                     
-                    print("Setting up server for image")
-                    rD <- rsDriver(browser="chrome", chromever = "105.0.5195.52",
-                                   extraCapabilities = list("chromeOptions" = list(args = list('--headless'))),
-                                   port=4550L, verbose=F
-                    )
-                    remDr <- rD$client
                     
-                    print("Charging web page")
-                    shinyjs::html(id = "smallerloadmessage", "Charging web page...")
-                    remDr$navigate(paste0("https://www.worldcat.org/fr/search?q=", isbn))
-                    Sys.sleep(5)
-                    
-                    print("Searching for cover image")
-                    shinyjs::html(id = "smallerloadmessage", "Searching for cover image...")
-                    
-                    imgs <- remDr$findElements(using = "css", "img")
-                    imgsrcs <- sapply(1:length(imgs), function(i) imgs[[i]]$getElementAttribute("src")[[1]]) 
-                    
-                    if (length(grep("coverart.oclc", imgsrcs))) {
-                        
-                        imgsrc <- grep("coverart.oclc", imgsrcs, value = T) %>%
-                            `[[`(1)
-                        
-                        print(imgsrc)
-                        urlImg <- "www/covers/temp_cover.jpg"
-                        
-                        tryCatch(
-                            expr = {
-                                download.file(imgsrc, urlImg)
-                                coverImg(urlImg)
-                                update_coverImage()
-                                reset_coverInput()
+                    tryCatch(
+                        expr = {
+                            print("Setting up server for image")
+                            rD <- rsDriver(browser="chrome", chromever = "105.0.5195.52",
+                                           extraCapabilities = list("chromeOptions" = list(args = list('--headless'))),
+                                           port=4550L, verbose=F
+                            )
+                            remDr <- rD$client
+                            
+                            print("Charging web page")
+                            shinyjs::html(id = "smallerloadmessage", "Charging web page...")
+                            remDr$navigate(paste0("https://www.worldcat.org/fr/search?q=", isbn))
+                            Sys.sleep(5)
+                            
+                            print("Searching for cover image")
+                            shinyjs::html(id = "smallerloadmessage", "Searching for cover image...")
+                            
+                            imgs <- remDr$findElements(using = "css", "img")
+                            imgsrcs <- sapply(1:length(imgs), function(i) imgs[[i]]$getElementAttribute("src")[[1]]) 
+                            
+                            if (length(grep("coverart.oclc", imgsrcs))) {
                                 
-                                # output$resetupload <- renderUI({
-                                #     actionButton(inputId = "resetupload_button",
-                                #                  label = "x")
-                                # })
-                                # enable(id = "resetupload_button")
+                                imgsrc <- grep("coverart.oclc", imgsrcs, value = T) %>%
+                                    `[[`(1)
                                 
-                            },
-                            error = function(e) {
-                                cat(sprintf("There was an error when downloading %s\n", imgsrc))
+                                print(imgsrc)
+                                urlImg <- "www/covers/temp_cover.jpg"
+                                
+                                tryCatch(
+                                    expr = {
+                                        download.file(imgsrc, urlImg)
+                                        coverImg(urlImg)
+                                        update_coverImage()
+                                        reset_coverInput()
+                                        
+                                        # output$resetupload <- renderUI({
+                                        #     actionButton(inputId = "resetupload_button",
+                                        #                  label = "x")
+                                        # })
+                                        # enable(id = "resetupload_button")
+                                        
+                                    },
+                                    error = function(e) {
+                                        cat(sprintf("There was an error when downloading %s\n", imgsrc))
+                                    }
+                                )
                             }
-                        )
-                    }
+                        },
+                        error = function(e) {
+                            cat("No result from image search\n")
+                        },
+                        finally = {
+                            remDr$close()
+                            rD$server$stop()
+                            rD$server$process
+                            rm(rD)
+                            gc()
+                        }
+                    )
                     
-                    remDr$close()
-                    rD$server$stop()
-                    rD$server$process
-                    rm(rD)
-                    gc()
+                    
                     
                 }
             }
             
         }
         
+        update_coverImage()
         shinyjs::html(id = "loadmessage", "")
         shinyjs::html(id = "smallerloadmessage", "")
         
