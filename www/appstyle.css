@@ -96,7 +96,7 @@ h2 {
 #side-panel {
   margin-top: 15px;
   padding-left: 0px;
-  width: 20%;
+  /*width: 20%;*/
 }
 
 #side-panel .well {
@@ -125,13 +125,14 @@ div[data-value=ajouter] > div.container-fluid {
 }
 
 #imageDiv, #edit_imageDiv {
+    text-align: center;
     padding-left: 7px;
 }
 
-#imageSubDiv, #edit_imageSubDiv {
+/*#imageSubDiv, #edit_imageSubDiv {
     padding-right: 15px;
     text-align: center;
-}
+}*/
     
 
 /*#edit_imageDiv {
