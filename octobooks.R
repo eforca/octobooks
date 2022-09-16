@@ -1149,7 +1149,7 @@ server <- function(input, output, session) {
                     
                     imgsrc <- sprintf("%s%s-475x500-2.webp", imgsrc_init, isbn)
                     
-                    urlImg <- "www/covers/temp_cover.webp"
+                    urlImg <- "www/covers/temp_cover.jpg"
                     
                     tryCatch(
                         expr = {
