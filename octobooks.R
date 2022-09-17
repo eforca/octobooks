@@ -190,10 +190,10 @@ ui <- fluidPage(
                                     ),
                                 ),
                                 # width = 2,
-                                div(
-                                    id = "smallerloadmessage",
-                                    ""
-                                )
+                                # div(
+                                #     id = "smallerloadmessage",
+                                #     ""
+                                # )
                             ),
                             awesomeRadio("read", "Lu", 
                                          c("Non" = "non",
@@ -361,7 +361,8 @@ ui <- fluidPage(
                                 ),
                             )
                      ),
-                 )
+                 ),
+                 div(id = "progress-message")
         ),
         
         ## Tableau de données ----
@@ -1087,7 +1088,7 @@ server <- function(input, output, session) {
             updateTextInput(inputId = "isbn", value = isbn)
             
             print("Trying Zotero for info")
-            shinyjs::html(id = "smallerloadmessage", "Searching for book info...")
+            shinyjs::html(id = "progress-message", "Searching for book info...")
             
             res <- POST("https://t0guvf0w17.execute-api.us-east-1.amazonaws.com/Prod//search",
                         add_headers(Referer = "https://www.zotero.org/",
@@ -1131,7 +1132,7 @@ server <- function(input, output, session) {
             if (coverImg() == "www/covers/dummy_cover.jpg") {
                 
                 print("Trying Decitre for cover")
-                shinyjs::html(id = "smallerloadmessage", "Trying Decitre for cover...")
+                shinyjs::html(id = "progress-message", "Trying Decitre for cover...")
                 res_decitre <- GET(sprintf("https://www.decitre.fr/livres/%s.html",
                                            isbn))
                 if (status_code(res_decitre) == 200 && 
@@ -1168,7 +1169,7 @@ server <- function(input, output, session) {
                     
                 } else if (values$settings$worldcat == "Oui") {
                     print("Trying Worldcat for cover")
-                    shinyjs::html(id = "smallerloadmessage", "Trying Worldcat for cover...")
+                    shinyjs::html(id = "progress-message", "Trying Worldcat for cover...")
                     
                     
                     tryCatch(
@@ -1181,12 +1182,12 @@ server <- function(input, output, session) {
                             remDr <- rD$client
                             
                             print("Charging web page")
-                            shinyjs::html(id = "smallerloadmessage", "Charging web page...")
+                            shinyjs::html(id = "progress-message", "Charging web page...")
                             remDr$navigate(paste0("https://www.worldcat.org/fr/search?q=", isbn))
                             Sys.sleep(5)
                             
                             print("Searching for cover image")
-                            shinyjs::html(id = "smallerloadmessage", "Searching for cover image...")
+                            shinyjs::html(id = "progress-message", "Searching for cover image...")
                             
                             imgs <- remDr$findElements(using = "css", "img")
                             imgsrcs <- sapply(1:length(imgs), function(i) imgs[[i]]$getElementAttribute("src")[[1]]) 
@@ -1240,7 +1241,7 @@ server <- function(input, output, session) {
         
         update_coverImage()
         shinyjs::html(id = "loadmessage", "")
-        shinyjs::html(id = "smallerloadmessage", "")
+        shinyjs::html(id = "progress-message", "")
         
         
     })
