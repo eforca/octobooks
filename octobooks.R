@@ -159,6 +159,7 @@ ui <- fluidPage(
     useShinyjs(),
     tags$script(src = "appscript.js"),
     tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "appstyle.css")),
+    tags$head(tags$style(HTML(sprintf(":root { --theme_colour: %s; }", config$settings$themeColour)))),
     
     # Application title
     titlePanel("Octobooks"),
@@ -221,9 +222,9 @@ ui <- fluidPage(
                                        tags$div(id = "auteuricesMainDiv",
                                                 strong("Auteurices"),
                                                 actionButton('insertAutBtn', '+', 
-                                                             class = "orange-btn autandtrad"), 
+                                                             class = "coloured-btn autandtrad"), 
                                                 actionButton('removeAutBtn', '-', 
-                                                             class = "orange-btn autandtrad"),
+                                                             class = "coloured-btn autandtrad"),
                                                 tags$div(id = "auteuricesSubDiv",
                                                          fluidRow(id = "auteuricesRow",
                                                                   column(4, 
@@ -237,9 +238,9 @@ ui <- fluidPage(
                                        tags$div(id = "traducteuricesMainDiv",
                                                 strong("Traducteurices"),
                                                 actionButton('insertTradBtn', '+', 
-                                                             class = "orange-btn autandtrad"), 
+                                                             class = "coloured-btn autandtrad"), 
                                                 actionButton('removeTradBtn', '-', 
-                                                             class = "orange-btn autandtrad"),
+                                                             class = "coloured-btn autandtrad"),
                                                 tags$div(id = "traducteuricesSubDiv",
                                                          fluidRow(id = "traducteuricesRow"))),
                                        
@@ -357,7 +358,7 @@ ui <- fluidPage(
                                                     label = "Réinitialiser"),
                                        actionButton(inputId = "add_button", 
                                                     label = "Ajouter",
-                                                    class = "orange-btn")
+                                                    class = "coloured-btn")
                                 ),
                             )
                      ),
@@ -453,7 +454,7 @@ ui <- fluidPage(
                               
                               actionButton(inputId = "change_defcols_button", 
                                            label = "Modifier",
-                                           class = "orange-btn"),
+                                           class = "coloured-btn"),
                               div(id = "newdefcolsMessage")
                      ),
                      
@@ -474,7 +475,7 @@ ui <- fluidPage(
                                              uiOutput("defvalue"),
                                              actionButton(inputId = "change_default_button", 
                                                           label = "Modifier",
-                                                          class = "orange-btn"),
+                                                          class = "coloured-btn"),
                                              cellWidths = c("60%", "40%"))
                                   ),
                               ),
@@ -497,7 +498,7 @@ ui <- fluidPage(
                                                        "Nouvelle valeur :"),
                                              actionButton(inputId = "add_choice_button", 
                                                           label = "Ajouter",
-                                                          class = "orange-btn"),
+                                                          class = "coloured-btn"),
                                              cellWidths = c("60%", "40%")),
                                   ),
                               ),
@@ -540,6 +541,33 @@ ui <- fluidPage(
                                                       status = "info")
                                   ),
                               ),
+                              fluidRow(
+                                  column(10,
+                                         colorPickr("set_themeColour", 
+                                                    "Changer la couleur du thème",
+                                                    selected = config$settings$themeColour,
+                                                    update = "change",
+                                                    swatches = c("#EEA236",
+                                                                 "#990000",
+                                                                 "#6A0D83",
+                                                                 "#0B0672",
+                                                                 "#89A6FF",
+                                                                 "#8BB9B9",
+                                                                 config$settings$themeColour),
+                                                    pickr_width = "20em",
+                                                    theme = "monolith",
+                                                    position = "right-end",
+                                                    preview = FALSE,
+                                                    interaction = list(
+                                                        hex= FALSE,
+                                                        rgba = FALSE,
+                                                        input = TRUE,
+                                                        save = FALSE,
+                                                        clear = FALSE
+                                                    )
+                                         )
+                                  )
+                              ),
                               h4("Attention, les réglages suivants ne s'appliqueront qu'à la réouverture de l'application"),
                               fluidRow(
                                   column(8,
@@ -571,6 +599,8 @@ server <- function(input, output, session) {
     
     
     ## Ajouter ----
+
+    shinyjs::runjs("$('#pub_date, #edition_date').attr('maxlength', 4);")
     
     ### Listes dynamiques ----
     
@@ -613,11 +643,7 @@ server <- function(input, output, session) {
                           choices = values$choices$keywords)
         
     })
-    
-    
-    ### Affichage conditionnel ----
-    
-    shinyjs::runjs("$('#pub_date, #edition_date, #edit_pub_date').attr('maxlength', 4)")
+
     
     #### Date de lecture ----
     
@@ -762,9 +788,9 @@ server <- function(input, output, session) {
                 ui = div(id = "interpretesMainDiv",
                          strong("Interprètes"),
                          actionButton('insertIntBtn', '+', 
-                                      class = "orange-btn autandtrad"), 
+                                      class = "coloured-btn autandtrad"), 
                          actionButton('removeIntBtn', '-', 
-                                      class = "orange-btn autandtrad"),
+                                      class = "coloured-btn autandtrad"),
                          fluidRow(id = "interpretesRow",
                                   column(4, 
                                          textInput(inputId = "int1", label = NULL)
@@ -1654,7 +1680,7 @@ server <- function(input, output, session) {
                 easyClose = TRUE,
                 footer = tagList(modalButton("Annuler"),
                                  actionButton(button_id, "Valider", 
-                                              class = "orange-btn"))
+                                              class = "coloured-btn"))
             )
         )
     }
@@ -1966,7 +1992,7 @@ server <- function(input, output, session) {
                     easyClose = TRUE,
                     footer = tagList(modalButton("Annuler"),
                                      actionButton("confirm_delete", "Supprimer", 
-                                                  class = "orange-btn"))
+                                                  class = "coloured-btn"))
                 )
             )
         }
@@ -2240,7 +2266,7 @@ server <- function(input, output, session) {
                     easyClose = TRUE,
                     footer = tagList(modalButton("Annuler"),
                                      actionButton("confirm_newchoice", "Ajouter", 
-                                                  class = "orange-btn"))
+                                                  class = "coloured-btn"))
                 )
             )
         }
@@ -2269,6 +2295,12 @@ server <- function(input, output, session) {
     observeEvent(input$set_worldcat, {
         values$settings$worldcat <- input$set_worldcat
     })
+    
+    observeEvent(input$set_themeColour, {
+        shinyjs::runjs(sprintf("document.documentElement.style.setProperty('--theme_colour', '%s');",
+                               input$set_themeColour))
+        values$settings$themeColour <- input$set_themeColour
+    }, ignoreInit = TRUE)
     
     
     output$set_pageLength <- renderUI({

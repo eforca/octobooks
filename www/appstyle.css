@@ -1,7 +1,3 @@
-:root {
-  --theme_color: #eea236;
-}
-
 @font-face {  
   src: url(Powerpuff.otf);
   font-family: "Powerpuff";
@@ -19,27 +15,28 @@ body {
     background-color: transparent;
 }*/
 
-.orange-btn {
+.coloured-btn {
     color: #fff;
     /*background-color: #f0ad4e;*/
-    background-color: var(--theme_color);
-    border-color: var(--theme_color);
+    background-color: var(--theme_colour) !important;
+    border-color: var(--theme_colour) !important;
 }
 
-.orange-btn.focus, .orange-btn:focus {
+.coloured-btn.focus, .coloured-btn:focus {
     color: #fff;
-    background-color: var(--theme_color);
-    border-color: var(--theme_color);
+    background-color: var(--theme_colour);
+    border-color: var(--theme_colour);
 }
 
-.orange-btn.hover, .orange-btn:hover {
+.coloured-btn.hover, .coloured-btn:hover {
     color: #fff;
-    background-color: #ec971f;
-    border-color: #d58512;
+/*    background-color: #ec971f;
+    border-color: #d58512;*/
+    background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1))
 }
 
 a {
-  color: var(--theme_color) !important;
+  color: var(--theme_colour) !important;
   text-decoration: none;
 
   &:hover,
@@ -54,17 +51,17 @@ a {
 }
 
 .radio-info input[type="radio"]:checked + label::before {
-  border-color: var(--theme_color);
+  border-color: var(--theme_colour);
 }
 
 .radio-info input[type="radio"]:checked + label::after {
-  background-color: var(--theme_color);
+  background-color: var(--theme_colour);
 }
 
 .checkbox-info input[type="checkbox"]:checked + label::before, 
 .checkbox-info input[type="radio"]:checked + label::before {
-  background-color: var(--theme_color);
-  border-color: var(--theme_color);
+  background-color: var(--theme_colour);
+  border-color: var(--theme_colour);
 }
 
 span input[type="text"]:focus {
@@ -180,7 +177,7 @@ div[data-value=ajouter] > div.container-fluid {
 }
 
 #coverImageInput_progress .progress-bar, #edit_coverImageInput_progress .progress-bar {
-  /*background-color: var(--theme_color);*/
+  /*background-color: var(--theme_colour);*/
   background-color: black;
 }
 
@@ -311,7 +308,7 @@ div.dtsb-criteria select, .dtsb-value {
 }
 
 .table.dataTable tbody td.active, .table.dataTable tbody tr.active td {
-	background-color: var(--theme_color) !important;
+	background-color: var(--theme_colour) !important;
 	color: white;
 }
 
@@ -319,8 +316,8 @@ div.dtsb-criteria select, .dtsb-value {
   z-index: 3;
   color: white !important;
   cursor: default;
-  background-color: var(--theme_color) !important;
-  border-color: var(--theme_color) !important;
+  background-color: var(--theme_colour) !important;
+  border-color: var(--theme_colour) !important;
 }
 
 
