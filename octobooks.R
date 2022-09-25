@@ -590,6 +590,8 @@ ui <- fluidPage(
 # Server ----
 server <- function(input, output, session) {
     
+    shinyjs::runjs("localStorage.clear();")
+    
     # Base, choix proposés et choix par défaut
     values <- reactiveValues(books_df = books, 
                              selected_cols = config$selected_cols,
