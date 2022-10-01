@@ -1093,7 +1093,8 @@ server <- function(input, output, session) {
         
         shinyjs::html(id = "loadmessage", "En cours...")
         
-        shinyjs::html("")
+        shinyjs::disable(id = "isbnButton")
+        
         updateTextInput(inputId = "nbpages", value = "")
         updateTextInput(inputId = "edition_date", value = "")
         updateSelectInput(inputId = "langue", 
@@ -1285,6 +1286,7 @@ server <- function(input, output, session) {
         shinyjs::html(id = "loadmessage", "")
         shinyjs::html(id = "progress-message", "")
         
+        shinyjs::enable(id = "isbnButton")
         
     })
     
