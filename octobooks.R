@@ -350,10 +350,10 @@ ui <- fluidPage(
                             # Messages d'erreur et bouton ajouter
                             fluidRow(
                                 id = "bottom-row",
-                                column(8,
+                                column(9,
                                        div(id = "addMessage")
                                 ),
-                                column(4,
+                                column(3,
                                        actionButton(inputId = "reinit_button", 
                                                     label = "Réinitialiser"),
                                        actionButton(inputId = "add_button", 
@@ -544,7 +544,7 @@ ui <- fluidPage(
                               fluidRow(
                                   column(10,
                                          colorPickr("set_themeColour", 
-                                                    "Changer la couleur du thème",
+                                                    "Changer la couleur du thème :",
                                                     selected = config$settings$themeColour,
                                                     update = "change",
                                                     swatches = c("#EEA236",
@@ -568,15 +568,29 @@ ui <- fluidPage(
                                          )
                                   )
                               ),
-                              h4("Attention, les réglages suivants ne s'appliqueront qu'à la réouverture de l'application"),
+                              br(),
                               fluidRow(
                                   column(8,
-                                         uiOutput("set_pageLength")
+                                         id = "set_pageLength_col",
+                                         selectInput("set_pageLength",
+                                                     HTML("Nombre de lignes à afficher dans le tableau :<br>
+                                                           <span style='font-weight:400; color:silver'>Attention, ce réglage ne s'appliquera qu'à la réouverture de l'application</span>"),
+                                                     choices = c(10, 25, 50, 100),
+                                                     width = "100%",
+                                                     selected = config$settings$pageLength)
                                   ),
                               ),
                               fluidRow(
                                   column(8,
-                                         uiOutput("set_isbnCase")
+                                         id = "set_isbnCase_col",
+                                         selectInput("set_isbnCase",
+                                                     HTML("Affichage de l'acronyme isbn :<br>
+                                                           <span style='font-weight:400; color:silver'>Attention, ce réglage ne s'appliquera qu'à la réouverture de l'application</span>"),
+                                                     choices = c("isbn",
+                                                                 "Isbn",
+                                                                 "ISBN"),
+                                                     width = "100%",
+                                                     selected = config$settings$isbnCase)
                                   ),
                               )
                      ),
@@ -1444,6 +1458,7 @@ server <- function(input, output, session) {
                 callback = JS("$.fn.dataTable.ext.errMode = 'alert';"),
                 options = list(
                     stateSave = TRUE,
+                    pageLength = config$settings$pageLength,
                     dom = paste0("<'row'<'col-sm-12'Q>>",
                                  "<'row edit_row'<'col-sm-6'B><'col-sm-6'f>>",
                                  "<'row'<'col-sm-12'tr>>",
@@ -1484,6 +1499,7 @@ server <- function(input, output, session) {
                     order = isolate(input$books_tbl_state$order),
                     # paging = TRUE,
                     # pageLength = isolate(input$books_tbl_state$length),
+                    pageLength = config$settings$pageLength,
                     dom = paste0("<'row'<'col-sm-12'Q>>",
                                  "<'row edit_row'<'col-sm-6'B><'col-sm-6'f>>",
                                  "<'row'<'col-sm-12'tr>>",
@@ -2305,26 +2321,10 @@ server <- function(input, output, session) {
     }, ignoreInit = TRUE)
     
     
-    output$set_pageLength <- renderUI({
-        selectInput("set_pageLength",
-                    "Nombre de lignes à afficher dans le tableau :",
-                    choices = c(10, 25, 50, 100),
-                    selected = values$settings$pageLength)
-    })
-    
     observeEvent(input$set_pageLength, {
         values$settings$pageLength <- input$set_pageLength
     })
     
-    
-    output$set_isbnCase <- renderUI({
-        selectInput("set_isbnCase",
-                    "Affichage de l'acronyme isbn :",
-                    choices = c("isbn",
-                                "Isbn",
-                                "ISBN"),
-                    selected = values$settings$isbnCase)
-    })
     
     observeEvent(input$set_isbnCase, {
         values$settings$isbnCase <- input$set_isbnCase

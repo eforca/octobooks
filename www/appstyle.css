@@ -404,10 +404,10 @@ div[data-value=pref] h4 {
   margin-top: 5px;
 }
 
-#set_pageLength .selectize-control {
-    width: 50%;
+#set_pageLength_col .selectize-control {
+    width: 25%;
 }
 
-#set_isbnCase .selectize-control {
-    width: 50%;
+#set_isbnCase_col .selectize-control {
+    width: 25%;
 }
