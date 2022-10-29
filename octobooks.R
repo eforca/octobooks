@@ -72,7 +72,7 @@ if (!file.exists("data/octobooks.csv")) {
                       keywords = character(), 
                       cover = logical(),
                       score = integer(),
-                      star = logical()),
+                      onmyshelf = logical()),
            "data/octobooks.csv")
 }
 
@@ -110,7 +110,7 @@ books <- fread("data/octobooks.csv", integer64 = "character",
                                  integer=c("pub_date", "edition_date", "pages", 
                                            "duree_h", "duree_min", "score"),
                                  # POSIXct=c("read_deb_date", "read_fin_date"),
-                                 logical=c("cover", "star")))
+                                 logical=c("cover", "onmyshelf")))
 books[, read_deb_date := as.POSIXct(read_deb_date, tz = "GMT")]
 books[, read_fin_date := as.POSIXct(read_fin_date, tz = "GMT")]
 
@@ -150,6 +150,7 @@ labcols <- c(isbn = config$settings$isbnCase,
              duree = "Durée",
              owner = "Propriétaire",
              read = "Lu",
+             onmyshelf = "Dans ma bibli",
              read_deb_date = "Date début", 
              read_fin_date = "Date fin", 
              score = "Note",
@@ -193,12 +194,9 @@ ui <- fluidPage(
                                            )
                                     ),
                                 ),
-                                # width = 2,
-                                # div(
-                                #     id = "smallerloadmessage",
-                                #     ""
-                                # )
-                            ),
+                            checkboxGroupButtons("onmychelf",
+                                                choices = "Dans ma bibliothèque",
+                                                status = "theme-light"),
                             awesomeRadio("read", "Lu", 
                                          c("Non" = "non",
                                            "Oui" = "oui", 
@@ -1305,8 +1303,6 @@ server <- function(input, output, session) {
     })
     
     
-    ## Tableau de données ----
-    
     ### Ajout d'un livre à la base ----
     
     # Mise à jour de la base locale
@@ -1408,6 +1404,9 @@ server <- function(input, output, session) {
             }
         }
     })
+    
+    
+    ## Tableau de données ----
     
     ### Affichage du tableau ----
     

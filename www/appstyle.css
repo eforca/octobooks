@@ -23,7 +23,8 @@ body {
 }
 
 .coloured-btn.focus, .coloured-btn:focus,
-.btn-theme.focus, .btn-theme:focus {
+.btn-theme.focus, .btn-theme:focus,
+.btn-theme-light.focus, .btn-theme-light:focus {
     color: #fff;
     background-color: var(--theme_colour);
     border-color: var(--theme_colour);
@@ -37,8 +38,29 @@ body {
     background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1))
 }
 
+.btn-theme-light {
+    color: #333;
+    background-color: #fff !important;
+    border-color: #ccc !important;
+}
+
+.btn-theme-light.hover, .btn-theme-light:hover {
+    color: #fff;
+    background-color: var(--theme_colour) !important;
+    border-color: var(--theme_colour) !important;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1));
+}
+
 .btn-theme.active, .btn-theme:active, .open > .dropdown-toggle.btn-theme {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1))
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5));
+}
+
+
+
+.btn-theme-light.active, .btn-theme-light:active, .open > .dropdown-toggle.btn-theme-light {
+    color: #fff;
+    background-color: var(--theme_colour) !important;
+    border-color: var(--theme_colour) !important;
 }
 
 .btn-group-justified > .btn-group .btn {
@@ -146,6 +168,7 @@ h2 {
     padding-left: 10px;
     padding-top: 10px;
 }*/
+
 
 div[data-value=ajouter] > div.container-fluid {
   padding-left: 0px;
