@@ -15,24 +15,34 @@ body {
     background-color: transparent;
 }*/
 
-.coloured-btn {
+.coloured-btn, .btn-theme {
     color: #fff;
     /*background-color: #f0ad4e;*/
     background-color: var(--theme_colour) !important;
     border-color: var(--theme_colour) !important;
 }
 
-.coloured-btn.focus, .coloured-btn:focus {
+.coloured-btn.focus, .coloured-btn:focus,
+.btn-theme.focus, .btn-theme:focus {
     color: #fff;
     background-color: var(--theme_colour);
     border-color: var(--theme_colour);
 }
 
-.coloured-btn.hover, .coloured-btn:hover {
+.coloured-btn.hover, .coloured-btn:hover,
+.btn-theme.hover, .btn-theme:hover {
     color: #fff;
 /*    background-color: #ec971f;
     border-color: #d58512;*/
     background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1))
+}
+
+.btn-theme.active, .btn-theme:active, .open > .dropdown-toggle.btn-theme {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1))
+}
+
+.btn-group-justified > .btn-group .btn {
+    width: 90%;
 }
 
 a {
@@ -63,6 +73,22 @@ a {
   background-color: var(--theme_colour);
   border-color: var(--theme_colour);
 }
+
+
+
+/*
+
+.btn-info.focus, .btn-info:focus {
+    color: #fff;
+    background-color: var(--theme_colour);
+    border-color: var(--theme_colour);
+}
+
+.btn-info.hover, .btn-info:hover {
+    color: #fff;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1))
+}*/
+
 
 span input[type="text"]:focus {
   border-color: red !important;
@@ -148,10 +174,6 @@ div[data-value=ajouter] > div.container-fluid {
   margin-bottom: 16.5px;
 }
 
-/*.cover-layout {
-  width: 183px;
-  /*margin: auto;*/
-}*/
 
 #coverImageInput .input-group, #edit_coverImageInput .input-group {
   /*width: 75%;*/

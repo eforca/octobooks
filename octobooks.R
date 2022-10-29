@@ -70,7 +70,9 @@ if (!file.exists("data/octobooks.csv")) {
                       read_deb_date = POSIXct(),
                       read_fin_date = POSIXct(),
                       keywords = character(), 
-                      cover = logical()),
+                      cover = logical(),
+                      score = integer(),
+                      star = logical()),
            "data/octobooks.csv")
 }
 
@@ -106,9 +108,9 @@ books <- fread("data/octobooks.csv", integer64 = "character",
                                              "pays_vo", "langue", "format",
                                              "owner", "read", "keywords"),
                                  integer=c("pub_date", "edition_date", "pages", 
-                                           "duree_h", "duree_min"),
+                                           "duree_h", "duree_min", "score"),
                                  # POSIXct=c("read_deb_date", "read_fin_date"),
-                                 logical=c("cover")))
+                                 logical=c("cover", "star")))
 books[, read_deb_date := as.POSIXct(read_deb_date, tz = "GMT")]
 books[, read_fin_date := as.POSIXct(read_fin_date, tz = "GMT")]
 
@@ -150,6 +152,7 @@ labcols <- c(isbn = config$settings$isbnCase,
              read = "Lu",
              read_deb_date = "Date début", 
              read_fin_date = "Date fin", 
+             score = "Note",
              keywords = "Mots-clés",
              cover = "Couverture")
 
@@ -692,8 +695,19 @@ server <- function(input, output, session) {
                                   #        <i class="rating__star far fa-star"></i>
                                   #        <i class="rating__star far fa-star"></i>
                                   #       </div>')
+                                  radioGroupButtons(
+                                      inputId = "score",
+                                      label = "Note",
+                                      choices = c(0:5, "★"),
+                                      selected = character(0),
+                                      justified = TRUE,
+                                      individual = TRUE,
+                                      status = "theme"
+                                  )
+                                  
+                                  
                     )
-                ) 
+                )
             } else {
                 updateCheckboxInput(session, "read_date_na", value = FALSE)
             }
