@@ -1,7 +1,7 @@
 #########################################################
-# Octobooks 1.0.2
+# Octobooks 1.1
 # Eliot Forcadell
-# 2022/09/13
+# 2022/12/29
 #########################################################
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(shiny, shinyjs, shinyWidgets, DT, yaml,
@@ -70,7 +70,9 @@ if (!file.exists("data/octobooks.csv")) {
                       read_deb_date = POSIXct(),
                       read_fin_date = POSIXct(),
                       keywords = character(), 
-                      cover = logical()),
+                      cover = logical(),
+                      score = character(),
+                      onmyshelf = logical()),
            "data/octobooks.csv")
 }
 
@@ -104,11 +106,11 @@ books <- fread("data/octobooks.csv", integer64 = "character",
                colClasses = list(character=c("title", "authors", "translators", "interpreters",
                                              "genders", "genre", "langue_vo", 
                                              "pays_vo", "langue", "format",
-                                             "owner", "read", "keywords"),
+                                             "owner", "read", "keywords", "score"),
                                  integer=c("pub_date", "edition_date", "pages", 
                                            "duree_h", "duree_min"),
                                  # POSIXct=c("read_deb_date", "read_fin_date"),
-                                 logical=c("cover")))
+                                 logical=c("cover", "onmyshelf")))
 books[, read_deb_date := as.POSIXct(read_deb_date, tz = "GMT")]
 books[, read_fin_date := as.POSIXct(read_fin_date, tz = "GMT")]
 
@@ -148,8 +150,10 @@ labcols <- c(isbn = config$settings$isbnCase,
              duree = "Durée",
              owner = "Propriétaire",
              read = "Lu",
+             onmyshelf = "Dans ma bibli",
              read_deb_date = "Date début", 
              read_fin_date = "Date fin", 
+             score = "Note",
              keywords = "Mots-clés",
              cover = "Couverture")
 
@@ -159,6 +163,7 @@ ui <- fluidPage(
     useShinyjs(),
     tags$script(src = "appscript.js"),
     tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "appstyle.css")),
+    tags$head(tags$style(HTML(sprintf(":root { --theme_colour: %s; }", config$settings$themeColour)))),
     
     # Application title
     titlePanel("Octobooks"),
@@ -189,12 +194,10 @@ ui <- fluidPage(
                                            )
                                     ),
                                 ),
-                                # width = 2,
-                                div(
-                                    id = "smallerloadmessage",
-                                    ""
-                                )
                             ),
+                            checkboxGroupButtons("onmyshelf",
+                                                choices = c("Dans ma bibliothèque" = TRUE),
+                                                status = "theme-light"),
                             awesomeRadio("read", "Lu", 
                                          c("Non" = "non",
                                            "Oui" = "oui", 
@@ -221,9 +224,9 @@ ui <- fluidPage(
                                        tags$div(id = "auteuricesMainDiv",
                                                 strong("Auteurices"),
                                                 actionButton('insertAutBtn', '+', 
-                                                             class = "orange-btn autandtrad"), 
+                                                             class = "coloured-btn autandtrad"), 
                                                 actionButton('removeAutBtn', '-', 
-                                                             class = "orange-btn autandtrad"),
+                                                             class = "coloured-btn autandtrad"),
                                                 tags$div(id = "auteuricesSubDiv",
                                                          fluidRow(id = "auteuricesRow",
                                                                   column(4, 
@@ -237,9 +240,9 @@ ui <- fluidPage(
                                        tags$div(id = "traducteuricesMainDiv",
                                                 strong("Traducteurices"),
                                                 actionButton('insertTradBtn', '+', 
-                                                             class = "orange-btn autandtrad"), 
+                                                             class = "coloured-btn autandtrad"), 
                                                 actionButton('removeTradBtn', '-', 
-                                                             class = "orange-btn autandtrad"),
+                                                             class = "coloured-btn autandtrad"),
                                                 tags$div(id = "traducteuricesSubDiv",
                                                          fluidRow(id = "traducteuricesRow"))),
                                        
@@ -349,19 +352,20 @@ ui <- fluidPage(
                             # Messages d'erreur et bouton ajouter
                             fluidRow(
                                 id = "bottom-row",
-                                column(8,
+                                column(9,
                                        div(id = "addMessage")
                                 ),
-                                column(4,
+                                column(3,
                                        actionButton(inputId = "reinit_button", 
                                                     label = "Réinitialiser"),
                                        actionButton(inputId = "add_button", 
                                                     label = "Ajouter",
-                                                    class = "orange-btn")
+                                                    class = "coloured-btn")
                                 ),
                             )
                      ),
-                 )
+                 ),
+                 div(id = "progress-message")
         ),
         
         ## Tableau de données ----
@@ -452,7 +456,7 @@ ui <- fluidPage(
                               
                               actionButton(inputId = "change_defcols_button", 
                                            label = "Modifier",
-                                           class = "orange-btn"),
+                                           class = "coloured-btn"),
                               div(id = "newdefcolsMessage")
                      ),
                      
@@ -473,7 +477,7 @@ ui <- fluidPage(
                                              uiOutput("defvalue"),
                                              actionButton(inputId = "change_default_button", 
                                                           label = "Modifier",
-                                                          class = "orange-btn"),
+                                                          class = "coloured-btn"),
                                              cellWidths = c("60%", "40%"))
                                   ),
                               ),
@@ -496,7 +500,7 @@ ui <- fluidPage(
                                                        "Nouvelle valeur :"),
                                              actionButton(inputId = "add_choice_button", 
                                                           label = "Ajouter",
-                                                          class = "orange-btn"),
+                                                          class = "coloured-btn"),
                                              cellWidths = c("60%", "40%")),
                                   ),
                               ),
@@ -539,15 +543,56 @@ ui <- fluidPage(
                                                       status = "info")
                                   ),
                               ),
-                              h4("Attention, les réglages suivants ne s'appliqueront qu'à la réouverture de l'application"),
+                              fluidRow(
+                                  column(10,
+                                         colorPickr("set_themeColour", 
+                                                    "Changer la couleur du thème :",
+                                                    selected = config$settings$themeColour,
+                                                    update = "change",
+                                                    swatches = c("#EEA236",
+                                                                 "#990000",
+                                                                 "#6A0D83",
+                                                                 "#0B0672",
+                                                                 "#89A6FF",
+                                                                 "#8BB9B9",
+                                                                 config$settings$themeColour),
+                                                    pickr_width = "20em",
+                                                    theme = "monolith",
+                                                    position = "right-end",
+                                                    preview = FALSE,
+                                                    interaction = list(
+                                                        hex= FALSE,
+                                                        rgba = FALSE,
+                                                        input = TRUE,
+                                                        save = FALSE,
+                                                        clear = FALSE
+                                                    )
+                                         )
+                                  )
+                              ),
+                              br(),
                               fluidRow(
                                   column(8,
-                                         uiOutput("set_pageLength")
+                                         id = "set_pageLength_col",
+                                         selectInput("set_pageLength",
+                                                     HTML("Nombre de lignes à afficher dans le tableau :<br>
+                                                           <span style='font-weight:400; color:silver'>Attention, ce réglage ne s'appliquera qu'à la réouverture de l'application</span>"),
+                                                     choices = c(10, 25, 50, 100),
+                                                     width = "100%",
+                                                     selected = config$settings$pageLength)
                                   ),
                               ),
                               fluidRow(
                                   column(8,
-                                         uiOutput("set_isbnCase")
+                                         id = "set_isbnCase_col",
+                                         selectInput("set_isbnCase",
+                                                     HTML("Affichage de l'acronyme isbn :<br>
+                                                           <span style='font-weight:400; color:silver'>Attention, ce réglage ne s'appliquera qu'à la réouverture de l'application</span>"),
+                                                     choices = c("isbn",
+                                                                 "Isbn",
+                                                                 "ISBN"),
+                                                     width = "100%",
+                                                     selected = config$settings$isbnCase)
                                   ),
                               )
                      ),
@@ -561,6 +606,8 @@ ui <- fluidPage(
 # Server ----
 server <- function(input, output, session) {
     
+    shinyjs::runjs("localStorage.clear();")
+    
     # Base, choix proposés et choix par défaut
     values <- reactiveValues(books_df = books, 
                              selected_cols = config$selected_cols,
@@ -570,6 +617,8 @@ server <- function(input, output, session) {
     
     
     ## Ajouter ----
+
+    shinyjs::runjs("$('#pub_date, #edition_date').attr('maxlength', 4);")
     
     ### Listes dynamiques ----
     
@@ -612,11 +661,7 @@ server <- function(input, output, session) {
                           choices = values$choices$keywords)
         
     })
-    
-    
-    ### Affichage conditionnel ----
-    
-    shinyjs::runjs("$('#pub_date, #edition_date, #edit_pub_date').attr('maxlength', 4)")
+
     
     #### Date de lecture ----
     
@@ -649,8 +694,20 @@ server <- function(input, output, session) {
                                   #        <i class="rating__star far fa-star"></i>
                                   #        <i class="rating__star far fa-star"></i>
                                   #       </div>')
+                                  radioGroupButtons(
+                                      inputId = "score",
+                                      label = "Note",
+                                      choices = setNames(c(0:5, "*"),
+                                                         c(0:5, "★")),
+                                      selected = character(0),
+                                      justified = TRUE,
+                                      individual = TRUE,
+                                      status = "theme"
+                                  )
+                                  
+                                  
                     )
-                ) 
+                )
             } else {
                 updateCheckboxInput(session, "read_date_na", value = FALSE)
             }
@@ -761,9 +818,9 @@ server <- function(input, output, session) {
                 ui = div(id = "interpretesMainDiv",
                          strong("Interprètes"),
                          actionButton('insertIntBtn', '+', 
-                                      class = "orange-btn autandtrad"), 
+                                      class = "coloured-btn autandtrad"), 
                          actionButton('removeIntBtn', '-', 
-                                      class = "orange-btn autandtrad"),
+                                      class = "coloured-btn autandtrad"),
                          fluidRow(id = "interpretesRow",
                                   column(4, 
                                          textInput(inputId = "int1", label = NULL)
@@ -1050,7 +1107,8 @@ server <- function(input, output, session) {
         
         shinyjs::html(id = "loadmessage", "En cours...")
         
-        shinyjs::html("")
+        shinyjs::disable(id = "isbnButton")
+        
         updateTextInput(inputId = "nbpages", value = "")
         updateTextInput(inputId = "edition_date", value = "")
         updateSelectInput(inputId = "langue", 
@@ -1087,7 +1145,7 @@ server <- function(input, output, session) {
             updateTextInput(inputId = "isbn", value = isbn)
             
             print("Trying Zotero for info")
-            shinyjs::html(id = "smallerloadmessage", "Searching for book info...")
+            shinyjs::html(id = "progress-message", "Searching for book info...")
             
             res <- POST("https://t0guvf0w17.execute-api.us-east-1.amazonaws.com/Prod//search",
                         add_headers(Referer = "https://www.zotero.org/",
@@ -1131,7 +1189,7 @@ server <- function(input, output, session) {
             if (coverImg() == "www/covers/dummy_cover.jpg") {
                 
                 print("Trying Decitre for cover")
-                shinyjs::html(id = "smallerloadmessage", "Trying Decitre for cover...")
+                shinyjs::html(id = "progress-message", "Trying Decitre for cover...")
                 res_decitre <- GET(sprintf("https://www.decitre.fr/livres/%s.html",
                                            isbn))
                 if (status_code(res_decitre) == 200 && 
@@ -1168,7 +1226,7 @@ server <- function(input, output, session) {
                     
                 } else if (values$settings$worldcat == "Oui") {
                     print("Trying Worldcat for cover")
-                    shinyjs::html(id = "smallerloadmessage", "Trying Worldcat for cover...")
+                    shinyjs::html(id = "progress-message", "Trying Worldcat for cover...")
                     
                     
                     tryCatch(
@@ -1181,12 +1239,12 @@ server <- function(input, output, session) {
                             remDr <- rD$client
                             
                             print("Charging web page")
-                            shinyjs::html(id = "smallerloadmessage", "Charging web page...")
+                            shinyjs::html(id = "progress-message", "Charging web page...")
                             remDr$navigate(paste0("https://www.worldcat.org/fr/search?q=", isbn))
                             Sys.sleep(5)
                             
                             print("Searching for cover image")
-                            shinyjs::html(id = "smallerloadmessage", "Searching for cover image...")
+                            shinyjs::html(id = "progress-message", "Searching for cover image...")
                             
                             imgs <- remDr$findElements(using = "css", "img")
                             imgsrcs <- sapply(1:length(imgs), function(i) imgs[[i]]$getElementAttribute("src")[[1]]) 
@@ -1240,13 +1298,12 @@ server <- function(input, output, session) {
         
         update_coverImage()
         shinyjs::html(id = "loadmessage", "")
-        shinyjs::html(id = "smallerloadmessage", "")
+        shinyjs::html(id = "progress-message", "")
         
+        shinyjs::enable(id = "isbnButton")
         
     })
     
-    
-    ## Tableau de données ----
     
     ### Ajout d'un livre à la base ----
     
@@ -1264,6 +1321,16 @@ server <- function(input, output, session) {
         read_fin_date <- NA_POSIXct_
         if (!is.null(input$read_fin_date)) { 
             read_fin_date <- input$read_fin_date
+        }
+        
+        onmyshelf <- FALSE
+        if (!is.null(input$onmyshelf)) { 
+            onmyshelf <- input$onmyshelf
+        }
+        
+        score <- NA_character_
+        if (!is.null(input$score)) { 
+            score <- input$score
         }
         
         nbpages <- NA
@@ -1284,6 +1351,9 @@ server <- function(input, output, session) {
         if (cover) {
             file.copy(coverImg(), urlImg, overwrite = T)
         }
+        
+        print(input$score)
+        print(input$onmyshelf)
         
         addbooks_df <- data.frame(
             isbn = input$isbn,
@@ -1309,9 +1379,11 @@ server <- function(input, output, session) {
             read_deb_date = as.POSIXct(read_deb_date, tz = "GMT"),
             read_fin_date = as.POSIXct(read_fin_date, tz = "GMT"),
             keywords = paste(input$keywords, collapse = ";"),
-            cover = cover
+            cover = cover,
+            score = score,
+            onmyshelf = onmyshelf
         )
-        
+
         return(addbooks_df)
     })
     
@@ -1350,6 +1422,9 @@ server <- function(input, output, session) {
         }
     })
     
+    
+    ## Tableau de données ----
+    
     ### Affichage du tableau ----
     
     output$selcols <- renderUI({
@@ -1367,6 +1442,9 @@ server <- function(input, output, session) {
     
     
     fmt_tbl <- function(book_table, selcols = config$selected_cols) {
+        
+        print(book_table)
+        
         book_table$read <- code_lu[book_table$read]
         
         book_table$authors <- gsub(";", ", ", book_table$authors)
@@ -1393,6 +1471,10 @@ server <- function(input, output, session) {
         book_table$read_fin_date <- as.Date(book_table$read_fin_date, tz = "GMT")
         
         book_table$cover <- fifelse(book_table$cover, "Oui", "Non")
+        book_table$score <- fifelse(book_table$score == "*", "★", book_table$score)
+        book_table$onmyshelf <- fifelse(book_table$onmyshelf, "Oui", "Non")
+        
+        
         
         setnames(book_table, old = names(labcols), new = labcols)
         
@@ -1415,6 +1497,7 @@ server <- function(input, output, session) {
                 callback = JS("$.fn.dataTable.ext.errMode = 'alert';"),
                 options = list(
                     stateSave = TRUE,
+                    pageLength = config$settings$pageLength,
                     dom = paste0("<'row'<'col-sm-12'Q>>",
                                  "<'row edit_row'<'col-sm-6'B><'col-sm-6'f>>",
                                  "<'row'<'col-sm-12'tr>>",
@@ -1455,6 +1538,7 @@ server <- function(input, output, session) {
                     order = isolate(input$books_tbl_state$order),
                     # paging = TRUE,
                     # pageLength = isolate(input$books_tbl_state$length),
+                    pageLength = config$settings$pageLength,
                     dom = paste0("<'row'<'col-sm-12'Q>>",
                                  "<'row edit_row'<'col-sm-6'B><'col-sm-6'f>>",
                                  "<'row'<'col-sm-12'tr>>",
@@ -1512,7 +1596,30 @@ server <- function(input, output, session) {
                 id = "form-modal",
                 size = "l",
                 fluidPage(
-                    disabled(textInput("edit_isbn", config$settings$isbnCase, width = "33%")),
+                    fluidRow(
+                        column(4,
+                               disabled(textInput("edit_isbn", config$settings$isbnCase)),
+                               ),
+                        column(4,
+                               checkboxGroupButtons("edit_onmyshelf",
+                                                    label = " ",
+                                                    choices = c("Dans ma bibliothèque" = TRUE),
+                                                    justified = TRUE,
+                                                    status = "theme-light")
+                               ),
+                        column(4,
+                               radioGroupButtons(
+                                   inputId = "edit_score",
+                                   label = " ",
+                                   choices = setNames(c(0:5, "*"),
+                                                      c(0:5, "★")),
+                                   selected = character(0),
+                                   justified = TRUE,
+                                   individual = TRUE,
+                                   status = "theme-light"
+                               )
+                               )
+                    ),
                     fluidRow(
                         column(8,
                                textInput("edit_title", "Titre", width = "100%"),
@@ -1653,7 +1760,7 @@ server <- function(input, output, session) {
                 easyClose = TRUE,
                 footer = tagList(modalButton("Annuler"),
                                  actionButton(button_id, "Valider", 
-                                              class = "orange-btn"))
+                                              class = "coloured-btn"))
             )
         )
     }
@@ -1682,10 +1789,14 @@ server <- function(input, output, session) {
         if (input$edit_read == "non") {
             updateAirDateInput(session, inputId = "edit_read_deb_date", value = NULL, clear = T)
             updateAirDateInput(session, inputId = "edit_read_fin_date", value = NULL, clear = T)
+            updateRadioGroupButtons(session, "edit_score", selected = character(0), disabled = T)
+            
             disable(id = "edit_read_deb_date")
             disable(id = "edit_read_fin_date")
+
         } else {
             enable(id = "edit_read_deb_date")
+            enable(id = "edit_score")
             if (input$edit_read == "oui") {
                 enable(id = "edit_read_fin_date")
                 updateAirDateInput(session, "edit_read_fin_date",
@@ -1755,6 +1866,8 @@ server <- function(input, output, session) {
     #### Récupération des valeurs du formulaire ----
     editForm <- reactive({
         
+        print(names(input))
+        
         edit_read_deb_date <- NA_POSIXct_
         if (!is.null(input$edit_read_deb_date)) { 
             edit_read_deb_date <- input$edit_read_deb_date
@@ -1762,6 +1875,17 @@ server <- function(input, output, session) {
         edit_read_fin_date <- NA_POSIXct_
         if (!is.null(input$edit_read_fin_date)) { 
             edit_read_fin_date <- input$edit_read_fin_date
+        }
+        
+        print(input$edit_onmyshelf)
+        edit_onmyshelf <- FALSE
+        if (!is.null(input$edit_onmyshelf)) { 
+            edit_onmyshelf <- input$edit_onmyshelf
+        }
+        
+        edit_score <- NA_character_
+        if (!is.null(input$edit_score)) { 
+            edit_score <- input$edit_score
         }
         
         urlImg <- sprintf("www/covers/cover_%s.%s", input$edit_isbn, 
@@ -1775,7 +1899,7 @@ server <- function(input, output, session) {
             file.copy(edit_coverImg(), urlImg, overwrite = T)
             
         }
-        cover <- md5sum("www/covers/dummy_cover.jpg") != md5sum(urlImg)
+        edit_cover <- md5sum("www/covers/dummy_cover.jpg") != md5sum(urlImg)
         
         editForm <- data.frame(
             isbn = input$edit_isbn,
@@ -1799,9 +1923,13 @@ server <- function(input, output, session) {
             read_deb_date = as.POSIXct(edit_read_deb_date, tz = "GMT"),
             read_fin_date = as.POSIXct(edit_read_fin_date, tz = "GMT"),
             keywords = paste(input$edit_keywords, collapse = ";"),
-            cover = cover
+            cover = edit_cover,
+            score = edit_score,
+            onmyshelf = edit_onmyshelf
         )
         
+        print("Coucou editForm")
+        print(editForm)
         return(editForm)
     })
     
@@ -1829,8 +1957,13 @@ server <- function(input, output, session) {
             entry_form("submit_edit")
             
             book_values <- values$books_df[input$books_tbl_rows_selected,]
+            print("coucou book_values")
+            print(book_values)
             
             updateTextInput(session, "edit_isbn", value = book_values$isbn)
+            updateCheckboxGroupButtons(session, "edit_onmyshelf", selected = book_values$onmyshelf)
+            updateRadioGroupButtons(session, "edit_score", selected = book_values$score)
+            
             updateTextInput(session, "edit_title", value = book_values$title)
             updateTextInput(session, "edit_nbpages", value = book_values$pages)
             updateTextInput(session, "edit_duree_h", value = book_values$duree_h)
@@ -1854,6 +1987,8 @@ server <- function(input, output, session) {
                                        selected = strsplit(book_values$genders, ";")[[1]])
             updateSelectInput(session, "edit_keywords", 
                               selected = strsplit(book_values$keywords, ";")[[1]])
+            
+            print(input$edit_title)
             
             # Format
             if(book_values$format == "Audio") {
@@ -1918,7 +2053,8 @@ server <- function(input, output, session) {
         cols <- c("title", "authors", "translators", "interpreters", "genders", "genre", 
                   "pub_date", "edition_date", "langue_vo", "pays_vo", "langue", 
                   "format",  "pages", "duree_h", "duree_min", "owner", 
-                  "read", "read_deb_date", "read_fin_date", "keywords", "cover")
+                  "read", "read_deb_date", "read_fin_date", "keywords", "cover",
+                  "score", "onmyshelf")
         values$books_df[input$books_tbl_row_last_clicked, cols] <- edit_values[cols]
         
         update_db()
@@ -1965,7 +2101,7 @@ server <- function(input, output, session) {
                     easyClose = TRUE,
                     footer = tagList(modalButton("Annuler"),
                                      actionButton("confirm_delete", "Supprimer", 
-                                                  class = "orange-btn"))
+                                                  class = "coloured-btn"))
                 )
             )
         }
@@ -2239,7 +2375,7 @@ server <- function(input, output, session) {
                     easyClose = TRUE,
                     footer = tagList(modalButton("Annuler"),
                                      actionButton("confirm_newchoice", "Ajouter", 
-                                                  class = "orange-btn"))
+                                                  class = "coloured-btn"))
                 )
             )
         }
@@ -2269,27 +2405,17 @@ server <- function(input, output, session) {
         values$settings$worldcat <- input$set_worldcat
     })
     
+    observeEvent(input$set_themeColour, {
+        shinyjs::runjs(sprintf("document.documentElement.style.setProperty('--theme_colour', '%s');",
+                               input$set_themeColour))
+        values$settings$themeColour <- input$set_themeColour
+    }, ignoreInit = TRUE)
     
-    output$set_pageLength <- renderUI({
-        selectInput("set_pageLength",
-                    "Nombre de lignes à afficher dans le tableau :",
-                    choices = c(10, 25, 50, 100),
-                    selected = values$settings$pageLength)
-    })
     
     observeEvent(input$set_pageLength, {
         values$settings$pageLength <- input$set_pageLength
     })
     
-    
-    output$set_isbnCase <- renderUI({
-        selectInput("set_isbnCase",
-                    "Affichage de l'acronyme isbn :",
-                    choices = c("isbn",
-                                "Isbn",
-                                "ISBN"),
-                    selected = values$settings$isbnCase)
-    })
     
     observeEvent(input$set_isbnCase, {
         values$settings$isbnCase <- input$set_isbnCase
