@@ -1442,6 +1442,9 @@ server <- function(input, output, session) {
     
     
     fmt_tbl <- function(book_table, selcols = config$selected_cols) {
+        
+        print(book_table)
+        
         book_table$read <- code_lu[book_table$read]
         
         book_table$authors <- gsub(";", ", ", book_table$authors)
@@ -1786,10 +1789,14 @@ server <- function(input, output, session) {
         if (input$edit_read == "non") {
             updateAirDateInput(session, inputId = "edit_read_deb_date", value = NULL, clear = T)
             updateAirDateInput(session, inputId = "edit_read_fin_date", value = NULL, clear = T)
+            updateRadioGroupButtons(session, "edit_score", selected = character(0), disabled = T)
+            
             disable(id = "edit_read_deb_date")
             disable(id = "edit_read_fin_date")
+
         } else {
             enable(id = "edit_read_deb_date")
+            enable(id = "edit_score")
             if (input$edit_read == "oui") {
                 enable(id = "edit_read_fin_date")
                 updateAirDateInput(session, "edit_read_fin_date",
