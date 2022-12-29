@@ -71,7 +71,7 @@ if (!file.exists("data/octobooks.csv")) {
                       read_fin_date = POSIXct(),
                       keywords = character(), 
                       cover = logical(),
-                      score = integer(),
+                      score = character(),
                       onmyshelf = logical()),
            "data/octobooks.csv")
 }
@@ -106,9 +106,9 @@ books <- fread("data/octobooks.csv", integer64 = "character",
                colClasses = list(character=c("title", "authors", "translators", "interpreters",
                                              "genders", "genre", "langue_vo", 
                                              "pays_vo", "langue", "format",
-                                             "owner", "read", "keywords"),
+                                             "owner", "read", "keywords", "score"),
                                  integer=c("pub_date", "edition_date", "pages", 
-                                           "duree_h", "duree_min", "score"),
+                                           "duree_h", "duree_min"),
                                  # POSIXct=c("read_deb_date", "read_fin_date"),
                                  logical=c("cover", "onmyshelf")))
 books[, read_deb_date := as.POSIXct(read_deb_date, tz = "GMT")]
@@ -194,8 +194,9 @@ ui <- fluidPage(
                                            )
                                     ),
                                 ),
-                            checkboxGroupButtons("onmychelf",
-                                                choices = "Dans ma bibliothèque",
+                            ),
+                            checkboxGroupButtons("onmyshelf",
+                                                choices = c("Dans ma bibliothèque" = TRUE),
                                                 status = "theme-light"),
                             awesomeRadio("read", "Lu", 
                                          c("Non" = "non",
@@ -696,7 +697,8 @@ server <- function(input, output, session) {
                                   radioGroupButtons(
                                       inputId = "score",
                                       label = "Note",
-                                      choices = c(0:5, "★"),
+                                      choices = setNames(c(0:5, "*"),
+                                                         c(0:5, "★")),
                                       selected = character(0),
                                       justified = TRUE,
                                       individual = TRUE,
@@ -1321,6 +1323,16 @@ server <- function(input, output, session) {
             read_fin_date <- input$read_fin_date
         }
         
+        onmyshelf <- FALSE
+        if (!is.null(input$onmyshelf)) { 
+            onmyshelf <- input$onmyshelf
+        }
+        
+        score <- NA_character_
+        if (!is.null(input$score)) { 
+            score <- input$score
+        }
+        
         nbpages <- NA
         duree_h <- NA; duree_min <- NA
         interpreters <- NA_character_
@@ -1339,6 +1351,9 @@ server <- function(input, output, session) {
         if (cover) {
             file.copy(coverImg(), urlImg, overwrite = T)
         }
+        
+        print(input$score)
+        print(input$onmyshelf)
         
         addbooks_df <- data.frame(
             isbn = input$isbn,
@@ -1364,9 +1379,11 @@ server <- function(input, output, session) {
             read_deb_date = as.POSIXct(read_deb_date, tz = "GMT"),
             read_fin_date = as.POSIXct(read_fin_date, tz = "GMT"),
             keywords = paste(input$keywords, collapse = ";"),
-            cover = cover
+            cover = cover,
+            score = score,
+            onmyshelf = onmyshelf
         )
-        
+
         return(addbooks_df)
     })
     
@@ -1572,7 +1589,30 @@ server <- function(input, output, session) {
                 id = "form-modal",
                 size = "l",
                 fluidPage(
-                    disabled(textInput("edit_isbn", config$settings$isbnCase, width = "33%")),
+                    fluidRow(
+                        column(4,
+                               disabled(textInput("edit_isbn", config$settings$isbnCase)),
+                               ),
+                        column(4,
+                               checkboxGroupButtons("edit_onmyshelf",
+                                                    label = " ",
+                                                    choices = c("Dans ma bibliothèque" = TRUE),
+                                                    justified = TRUE,
+                                                    status = "theme-light")
+                               ),
+                        column(4,
+                               radioGroupButtons(
+                                   inputId = "edit_score",
+                                   label = " ",
+                                   choices = setNames(c(0:5, "*"),
+                                                      c(0:5, "★")),
+                                   selected = character(0),
+                                   justified = TRUE,
+                                   individual = TRUE,
+                                   status = "theme-light"
+                               )
+                               )
+                    ),
                     fluidRow(
                         column(8,
                                textInput("edit_title", "Titre", width = "100%"),
@@ -1815,6 +1855,8 @@ server <- function(input, output, session) {
     #### Récupération des valeurs du formulaire ----
     editForm <- reactive({
         
+        print(names(input))
+        
         edit_read_deb_date <- NA_POSIXct_
         if (!is.null(input$edit_read_deb_date)) { 
             edit_read_deb_date <- input$edit_read_deb_date
@@ -1822,6 +1864,17 @@ server <- function(input, output, session) {
         edit_read_fin_date <- NA_POSIXct_
         if (!is.null(input$edit_read_fin_date)) { 
             edit_read_fin_date <- input$edit_read_fin_date
+        }
+        
+        print(input$edit_onmyshelf)
+        edit_onmyshelf <- FALSE
+        if (!is.null(input$edit_onmyshelf)) { 
+            edit_onmyshelf <- input$edit_onmyshelf
+        }
+        
+        edit_score <- NA_character_
+        if (!is.null(input$edit_score)) { 
+            edit_score <- input$edit_score
         }
         
         urlImg <- sprintf("www/covers/cover_%s.%s", input$edit_isbn, 
@@ -1835,7 +1888,7 @@ server <- function(input, output, session) {
             file.copy(edit_coverImg(), urlImg, overwrite = T)
             
         }
-        cover <- md5sum("www/covers/dummy_cover.jpg") != md5sum(urlImg)
+        edit_cover <- md5sum("www/covers/dummy_cover.jpg") != md5sum(urlImg)
         
         editForm <- data.frame(
             isbn = input$edit_isbn,
@@ -1859,9 +1912,13 @@ server <- function(input, output, session) {
             read_deb_date = as.POSIXct(edit_read_deb_date, tz = "GMT"),
             read_fin_date = as.POSIXct(edit_read_fin_date, tz = "GMT"),
             keywords = paste(input$edit_keywords, collapse = ";"),
-            cover = cover
+            cover = edit_cover,
+            score = edit_score,
+            onmyshelf = edit_onmyshelf
         )
         
+        print("Coucou editForm")
+        print(editForm)
         return(editForm)
     })
     
@@ -1889,8 +1946,13 @@ server <- function(input, output, session) {
             entry_form("submit_edit")
             
             book_values <- values$books_df[input$books_tbl_rows_selected,]
+            print("coucou book_values")
+            print(book_values)
             
             updateTextInput(session, "edit_isbn", value = book_values$isbn)
+            updateCheckboxGroupButtons(session, "edit_onmyshelf", selected = book_values$onmyshelf)
+            updateRadioGroupButtons(session, "edit_score", selected = book_values$score)
+            
             updateTextInput(session, "edit_title", value = book_values$title)
             updateTextInput(session, "edit_nbpages", value = book_values$pages)
             updateTextInput(session, "edit_duree_h", value = book_values$duree_h)
@@ -1914,6 +1976,8 @@ server <- function(input, output, session) {
                                        selected = strsplit(book_values$genders, ";")[[1]])
             updateSelectInput(session, "edit_keywords", 
                               selected = strsplit(book_values$keywords, ";")[[1]])
+            
+            print(input$edit_title)
             
             # Format
             if(book_values$format == "Audio") {
@@ -1978,7 +2042,8 @@ server <- function(input, output, session) {
         cols <- c("title", "authors", "translators", "interpreters", "genders", "genre", 
                   "pub_date", "edition_date", "langue_vo", "pays_vo", "langue", 
                   "format",  "pages", "duree_h", "duree_min", "owner", 
-                  "read", "read_deb_date", "read_fin_date", "keywords", "cover")
+                  "read", "read_deb_date", "read_fin_date", "keywords", "cover",
+                  "score", "onmyshelf")
         values$books_df[input$books_tbl_row_last_clicked, cols] <- edit_values[cols]
         
         update_db()
