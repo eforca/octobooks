@@ -1468,6 +1468,10 @@ server <- function(input, output, session) {
         book_table$read_fin_date <- as.Date(book_table$read_fin_date, tz = "GMT")
         
         book_table$cover <- fifelse(book_table$cover, "Oui", "Non")
+        book_table$score <- fifelse(book_table$score == "*", "★", book_table$score)
+        book_table$onmyshelf <- fifelse(book_table$onmyshelf, "Oui", "Non")
+        
+        
         
         setnames(book_table, old = names(labcols), new = labcols)
         
