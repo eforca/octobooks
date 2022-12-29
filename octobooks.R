@@ -1,7 +1,7 @@
 #########################################################
-# Octobooks 1.0.2
+# Octobooks 1.1
 # Eliot Forcadell
-# 2022/09/13
+# 2022/12/29
 #########################################################
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(shiny, shinyjs, shinyWidgets, DT, yaml,
