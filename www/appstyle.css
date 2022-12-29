@@ -15,24 +15,56 @@ body {
     background-color: transparent;
 }*/
 
-.coloured-btn {
+.coloured-btn, .btn-theme {
     color: #fff;
     /*background-color: #f0ad4e;*/
     background-color: var(--theme_colour) !important;
     border-color: var(--theme_colour) !important;
 }
 
-.coloured-btn.focus, .coloured-btn:focus {
+.coloured-btn.focus, .coloured-btn:focus,
+.btn-theme.focus, .btn-theme:focus,
+.btn-theme-light.focus, .btn-theme-light:focus {
     color: #fff;
     background-color: var(--theme_colour);
     border-color: var(--theme_colour);
 }
 
-.coloured-btn.hover, .coloured-btn:hover {
+.coloured-btn.hover, .coloured-btn:hover,
+.btn-theme.hover, .btn-theme:hover {
     color: #fff;
 /*    background-color: #ec971f;
     border-color: #d58512;*/
-    background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1))
+    background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4))
+}
+
+.btn-theme-light {
+    color: #333;
+    background-color: #fff !important;
+    border-color: #ccc !important;
+}
+
+.btn-theme-light.hover, .btn-theme-light:hover {
+    color: #fff;
+    background-color: var(--theme_colour) !important;
+    border-color: var(--theme_colour) !important;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4));
+}
+
+.btn-theme.active, .btn-theme:active, .open > .dropdown-toggle.btn-theme {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4));
+}
+
+
+
+.btn-theme-light.active, .btn-theme-light:active, .open > .dropdown-toggle.btn-theme-light {
+    color: #fff;
+    background-color: var(--theme_colour) !important;
+    border-color: var(--theme_colour) !important;
+}
+
+div[aria-labelledby="score-label"] > .btn-group .btn {
+    width: 90%;
 }
 
 a {
@@ -63,6 +95,22 @@ a {
   background-color: var(--theme_colour);
   border-color: var(--theme_colour);
 }
+
+
+
+/*
+
+.btn-info.focus, .btn-info:focus {
+    color: #fff;
+    background-color: var(--theme_colour);
+    border-color: var(--theme_colour);
+}
+
+.btn-info.hover, .btn-info:hover {
+    color: #fff;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1))
+}*/
+
 
 span input[type="text"]:focus {
   border-color: red !important;
@@ -121,6 +169,7 @@ h2 {
     padding-top: 10px;
 }*/
 
+
 div[data-value=ajouter] > div.container-fluid {
   padding-left: 0px;
   padding-right: 30px;
@@ -148,10 +197,6 @@ div[data-value=ajouter] > div.container-fluid {
   margin-bottom: 16.5px;
 }
 
-/*.cover-layout {
-  width: 183px;
-  /*margin: auto;*/
-}*/
 
 #coverImageInput .input-group, #edit_coverImageInput .input-group {
   /*width: 75%;*/
@@ -192,6 +237,11 @@ div[data-value=ajouter] > div.container-fluid {
 
 #read {
   padding-left: 5px;
+  margin-top: 25px;
+}
+
+#read_date_subdiv > div {
+    margin-top: 20px;
 }
 
 .shiny-split-layout > div {
@@ -288,6 +338,11 @@ div.dtsb-criteria select, .dtsb-value {
 
 .edit_row {
   margin-top: 20px;
+}
+
+div[aria-labelledby="edit_onmyshelf-label"] > .btn-group .btn,
+div[aria-labelledby="edit_score-label"] > .btn-group .btn {
+    margin-top: 5px;
 }
 
 #edit_imageDiv {
