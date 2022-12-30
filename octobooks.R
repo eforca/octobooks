@@ -1,5 +1,5 @@
 #########################################################
-# Octobooks 1.1.1
+# Octobooks 1.1.2
 # Eliot Forcadell
 # 2022/12/30
 #########################################################
@@ -196,8 +196,8 @@ ui <- fluidPage(
                                 ),
                             ),
                             checkboxGroupButtons("onmyshelf",
-                                                choices = c("Dans ma bibliothèque" = TRUE),
-                                                status = "theme-light"),
+                                                 choices = c("Dans ma bibliothèque" = TRUE),
+                                                 status = "theme-light"),
                             awesomeRadio("read", "Lu", 
                                          c("Non" = "non",
                                            "Oui" = "oui", 
@@ -373,7 +373,7 @@ ui <- fluidPage(
                  value = "table",
                  fluidRow(
                      id = "selcols-row",
-                     column(1),
+                     # column(1),
                      uiOutput("selcols"),
                  ),
                  tags$div(id = "table_div",
@@ -550,12 +550,12 @@ ui <- fluidPage(
                                                     selected = config$settings$themeColour,
                                                     update = "change",
                                                     swatches = c("#EEA236",
-                                                                 "#990000",
-                                                                 "#6A0D83",
-                                                                 "#0B0672",
-                                                                 "#89A6FF",
-                                                                 "#8BB9B9",
-                                                                 config$settings$themeColour),
+                                                                          "#990000",
+                                                                          "#6A0D83",
+                                                                          "#0B0672",
+                                                                          "#89A6FF",
+                                                                          "#8BB9B9",
+                                                                          config$settings$themeColour),
                                                     pickr_width = "20em",
                                                     theme = "monolith",
                                                     position = "right-end",
@@ -617,7 +617,7 @@ server <- function(input, output, session) {
     
     
     ## Ajouter ----
-
+    
     shinyjs::runjs("$('#pub_date, #edition_date').attr('maxlength', 4);")
     
     ### Listes dynamiques ----
@@ -661,7 +661,7 @@ server <- function(input, output, session) {
                           choices = values$choices$keywords)
         
     })
-
+    
     
     #### Date de lecture ----
     
@@ -1326,11 +1326,11 @@ server <- function(input, output, session) {
         }
         
         nbpages <- NA
-        duree_h <- NA; duree_min <- NA
+        duree_h <- NA_integer_; duree_min <- NA_integer_
         interpreters <- NA_character_
         if(input$format == "Audio") {
-            duree_h <- input$duree_h
-            duree_min <- input$duree_min
+            duree_h <- fifelse(input$duree_h == "", 0, as.integer(input$duree_h))
+            duree_min <- fifelse(input$duree_min == "", 0, as.integer(input$duree_min))
             interpreters <- fifelse(length(int_inserted) == 0, NA_character_,
                                     fmt_semicol(sapply(int_inserted, function(x) input[[x]])))
         } else {
@@ -1361,8 +1361,8 @@ server <- function(input, output, session) {
             langue = input$langue,
             format = input$format,
             pages = as.integer(nbpages),
-            duree_h = as.integer(duree_h),
-            duree_min = as.integer(duree_min),
+            duree_h = duree_h,
+            duree_min = duree_min,
             owner = input$owner,
             read = input$read,
             read_deb_date = as.POSIXct(read_deb_date, tz = "GMT"),
@@ -1372,7 +1372,7 @@ server <- function(input, output, session) {
             score = score,
             onmyshelf = onmyshelf
         )
-
+        
         return(addbooks_df)
     })
     
@@ -1414,12 +1414,17 @@ server <- function(input, output, session) {
     ### Affichage du tableau ----
     
     output$selcols <- renderUI({
-        lapply(1:5, function(i) {
+        lapply(1:(length(labcols)%/%4 + 1), function(i) {
+            if (i > length(labcols)%/%4) {
+                li <- 4*i-3; hi <- 4*(i-1) + length(labcols)%%4
+            } else {
+                li <- 4*i-3; hi <- 4*i   
+            }
             column(2,
                    awesomeCheckboxGroup(paste0("selcols", i),
                                         label = NULL,
-                                        choices = setNames(names(labcols)[(4*i-3):(4*i)], 
-                                                           labcols[(4*i-3):(4*i)]),
+                                        choices = setNames(names(labcols)[li:hi], 
+                                                           labcols[li:hi]),
                                         selected = config$selected_cols,
                                         inline = F, status = "info")
             )
@@ -1467,7 +1472,7 @@ server <- function(input, output, session) {
     
     output$books_tbl <- DT::renderDataTable(expr = {
         selcols <- c(input$selcols1, input$selcols2, input$selcols3,
-                     input$selcols4, input$selcols5)
+                     input$selcols4, input$selcols5, input$selcols6)
         
         isolate(input$books_tbl_state$start)
         
@@ -1583,14 +1588,14 @@ server <- function(input, output, session) {
                     fluidRow(
                         column(4,
                                disabled(textInput("edit_isbn", config$settings$isbnCase)),
-                               ),
+                        ),
                         column(4,
                                checkboxGroupButtons("edit_onmyshelf",
                                                     label = " ",
                                                     choices = c("Dans ma bibliothèque" = TRUE),
                                                     justified = TRUE,
                                                     status = "theme-light")
-                               ),
+                        ),
                         column(4,
                                radioGroupButtons(
                                    inputId = "edit_score",
@@ -1602,7 +1607,7 @@ server <- function(input, output, session) {
                                    individual = TRUE,
                                    status = "theme-light"
                                )
-                               )
+                        )
                     ),
                     fluidRow(
                         column(8,
@@ -1751,20 +1756,23 @@ server <- function(input, output, session) {
     
     #### Format : nombre de pages et durée ----
     observeEvent(input$edit_format, {
-        if (input$edit_format == "Audio") {
+        
+        if (input$edit_format == "Audio")  {
+            updateTextInput(session, inputId = "edit_nbpages", value = "")
+            disable(selector = "#edit_nbpages")
             enable(selector = "#edit_duree_h")
             enable(selector = "#edit_duree_min")
-            updateTextInput(session, inputId = "edit_nbpages", value = NA)
-            disable(selector = "#edit_nbpages")
             enable(selector = "#edit_interpreters")
-        } else {
+        }
+        
+        if (input$edit_format %in% c("Papier", "Numérique"))  {
+            updateTextInput(session, inputId = "edit_interpreters", value = "")
+            updateTextInput(session, inputId = "edit_duree_h", value = "")
+            updateTextInput(session, inputId = "edit_duree_min", value = "")
+            enable(selector = "#edit_nbpages")
             disable(selector = "#edit_duree_h")
             disable(selector = "#edit_duree_min")
-            updateTextInput(session, inputId = "edit_duree_h", value = NA)
-            updateTextInput(session, inputId = "edit_duree_min", value = NA)
-            enable(selector = "#edit_nbpages")
             disable(selector = "#edit_interpreters")
-            updateTextInput(session, inputId = "edit_interpreters", value = NA)
         }
     })
     
@@ -1777,7 +1785,7 @@ server <- function(input, output, session) {
             
             disable(id = "edit_read_deb_date")
             disable(id = "edit_read_fin_date")
-
+            
         } else {
             enable(id = "edit_read_deb_date")
             enable(id = "edit_score")
@@ -1869,6 +1877,16 @@ server <- function(input, output, session) {
             edit_score <- input$edit_score
         }
         
+        edit_nbpages <- NA
+        edit_duree_h <- NA_integer_; edit_duree_min <- NA_integer_
+        edit_interpreters <- NA_character_
+        if(input$edit_format == "Audio") {
+            edit_duree_h <- fifelse(input$edit_duree_h == "", 0, as.integer(input$edit_duree_h))
+            edit_duree_min <- fifelse(input$edit_duree_min == "", 0, as.integer(input$edit_duree_min))
+        } else {
+            edit_nbpages <- as.integer(input$edit_nbpages)
+        }
+        
         urlImg <- sprintf("www/covers/cover_%s.%s", input$edit_isbn, 
                           file_ext(edit_coverImg()))
         print(urlImg)
@@ -1889,9 +1907,9 @@ server <- function(input, output, session) {
             translators = fmt_semicol(str_trim(strsplit(input$edit_translators, ",")[[1]])),
             interpreters = fmt_semicol(str_trim(strsplit(input$edit_interpreters, ",")[[1]])),
             genders = paste(input$edit_genders, collapse = ";"),
-            pages = as.integer(input$edit_nbpages),
-            duree_h = as.integer(input$edit_duree_h),
-            duree_min = as.integer(input$edit_duree_min),
+            pages = edit_nbpages,
+            duree_h = edit_duree_h,
+            duree_min = edit_duree_min,
             genre = input$edit_genre,
             pub_date = as.integer(input$edit_pub_date),
             edition_date = as.integer(input$edit_edition_date),
@@ -1908,7 +1926,7 @@ server <- function(input, output, session) {
             score = edit_score,
             onmyshelf = edit_onmyshelf
         )
-
+        
         return(editForm)
     })
     
@@ -1964,17 +1982,6 @@ server <- function(input, output, session) {
                                        selected = strsplit(book_values$genders, ";")[[1]])
             updateSelectInput(session, "edit_keywords", 
                               selected = strsplit(book_values$keywords, ";")[[1]])
-            
-            # Format
-            if(book_values$format == "Audio") {
-                enable(selector = "#edit_duree_h")
-                enable(selector = "#edit_duree_min")
-                disable(selector = "#edit_nbpages")
-            } else {
-                disable(selector = "#edit_duree_h")
-                disable(selector = "#edit_duree_min")
-                enable(selector = "#edit_nbpages")
-            }  
             
             # Dates
             if (book_values$read == "non") {
@@ -2103,7 +2110,7 @@ server <- function(input, output, session) {
             return(d[read %in% lu,])
         }
     }
-
+    
     
     ### Bilan global ----
     
@@ -2246,20 +2253,27 @@ server <- function(input, output, session) {
     ### Colonnes sélectionnées par défaut ----
     output$select_newdefcols <- renderUI({
         fluidRow(
-            lapply(1:5, function(i) {
+            lapply(1:(length(labcols)%/%4 + 1), function(i) {
+                if (i > length(labcols)%/%4) {
+                    li <- 4*i-3; hi <- 4*(i-1) + length(labcols)%%4
+                } else {
+                    li <- 4*i-3; hi <- 4*i   
+                }
                 column(2,
                        awesomeCheckboxGroup(paste0("newdefcols", i),
                                             label = NULL,
-                                            choices = setNames(names(labcols)[(4*i-3):(4*i)], labcols[(4*i-3):(4*i)]),
-                                            selected = values$selected_cols,
-                                            inline = F, status = "info")) 
+                                            choices = setNames(names(labcols)[li:hi], 
+                                                               labcols[li:hi]),
+                                            selected = config$selected_cols,
+                                            inline = F, status = "info")
+                )
             })
         )
     })
     
     observeEvent(input$change_defcols_button, {
         newselcols <- c(input$newdefcols1, input$newdefcols2, input$newdefcols3, 
-                        input$newdefcols4, input$newdefcols5)
+                        input$newdefcols4, input$newdefcols5, input$newdefcols6)
         values$selected_cols <- newselcols
         
         for(i in 1:6) {
