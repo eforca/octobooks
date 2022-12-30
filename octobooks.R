@@ -1,5 +1,5 @@
 #########################################################
-# Octobooks 1.1.2
+# Octobooks 1.1.3
 # Eliot Forcadell
 # 2022/12/30
 #########################################################
@@ -1004,6 +1004,7 @@ server <- function(input, output, session) {
         intbtn_count(1)
         
         updateTextInput(session, "isbn", value = "")
+        updateCheckboxGroupButtons(session, "onmyshelf", selected = character(0))
         updateTextInput(session, "titre", value = "")
         updateTextInput(session, "nbpages", value = "")
         updateTextInput(session, "duree_h", value = "")
@@ -1438,6 +1439,7 @@ server <- function(input, output, session) {
         
         book_table$authors <- gsub(";", ", ", book_table$authors)
         book_table$translators <- gsub(";", ", ", book_table$translators)
+        book_table$interpreters <- gsub(";", ", ", book_table$interpreters)
         
         book_table$genders <- sapply(
             book_table$genders, 
@@ -1486,7 +1488,7 @@ server <- function(input, output, session) {
                 callback = JS("$.fn.dataTable.ext.errMode = 'alert';"),
                 options = list(
                     stateSave = TRUE,
-                    pageLength = config$settings$pageLength,
+                    # pageLength = config$settings$pageLength,
                     dom = paste0("<'row'<'col-sm-12'Q>>",
                                  "<'row edit_row'<'col-sm-6'B><'col-sm-6'f>>",
                                  "<'row'<'col-sm-12'tr>>",
@@ -1527,7 +1529,7 @@ server <- function(input, output, session) {
                     order = isolate(input$books_tbl_state$order),
                     # paging = TRUE,
                     # pageLength = isolate(input$books_tbl_state$length),
-                    pageLength = config$settings$pageLength,
+                    # pageLength = config$settings$pageLength,
                     dom = paste0("<'row'<'col-sm-12'Q>>",
                                  "<'row edit_row'<'col-sm-6'B><'col-sm-6'f>>",
                                  "<'row'<'col-sm-12'tr>>",
