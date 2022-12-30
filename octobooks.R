@@ -532,17 +532,17 @@ ui <- fluidPage(
                                                       status = "info")
                                   ),
                               ),
-                              fluidRow(
-                                  column(10,
-                                         awesomeRadio("set_worldcat",
-                                                      HTML("Optimiser la recherche d'image de courverture, notamment pour les éditions non-françaises :<br>
-                                                           <span style='font-weight:400; color:silver'>Attention, cette option peut rallonger significativement le temps de recherche</span>"),
-                                                      choices = c("Oui", "Non"),
-                                                      selected = config$settings$worldcat,
-                                                      inline = T,
-                                                      status = "info")
-                                  ),
-                              ),
+                              # fluidRow(
+                              #     column(10,
+                              #            awesomeRadio("set_worldcat",
+                              #                         HTML("Optimiser la recherche d'image de courverture, notamment pour les éditions non-françaises :<br>
+                              #                              <span style='font-weight:400; color:silver'>Attention, cette option peut rallonger significativement le temps de recherche</span>"),
+                              #                         choices = c("Oui", "Non"),
+                              #                         selected = config$settings$worldcat,
+                              #                         inline = T,
+                              #                         status = "info")
+                              #     ),
+                              # ),
                               fluidRow(
                                   column(10,
                                          colorPickr("set_themeColour", 
@@ -571,17 +571,17 @@ ui <- fluidPage(
                                   )
                               ),
                               br(),
-                              fluidRow(
-                                  column(8,
-                                         id = "set_pageLength_col",
-                                         selectInput("set_pageLength",
-                                                     HTML("Nombre de lignes à afficher dans le tableau :<br>
-                                                           <span style='font-weight:400; color:silver'>Attention, ce réglage ne s'appliquera qu'à la réouverture de l'application</span>"),
-                                                     choices = c(10, 25, 50, 100),
-                                                     width = "100%",
-                                                     selected = config$settings$pageLength)
-                                  ),
-                              ),
+                              # fluidRow(
+                              #     column(8,
+                              #            id = "set_pageLength_col",
+                              #            selectInput("set_pageLength",
+                              #                        HTML("Nombre de lignes à afficher dans le tableau :<br>
+                              #                              <span style='font-weight:400; color:silver'>Attention, ce réglage ne s'appliquera qu'à la réouverture de l'application</span>"),
+                              #                        choices = c(10, 25, 50, 100),
+                              #                        width = "100%",
+                              #                        selected = config$settings$pageLength)
+                              #     ),
+                              # ),
                               fluidRow(
                                   column(8,
                                          id = "set_isbnCase_col",
