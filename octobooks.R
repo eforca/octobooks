@@ -1438,6 +1438,7 @@ server <- function(input, output, session) {
         
         book_table$authors <- gsub(";", ", ", book_table$authors)
         book_table$translators <- gsub(";", ", ", book_table$translators)
+        book_table$interpreters <- gsub(";", ", ", book_table$interpreters)
         
         book_table$genders <- sapply(
             book_table$genders, 
