@@ -1328,7 +1328,7 @@ server <- function(input, output, session) {
             onmyshelf <- input$onmyshelf
         }
         
-        score <- NA_character_
+        score <- ""
         if (!is.null(input$score)) { 
             score <- input$score
         }
@@ -1883,7 +1883,7 @@ server <- function(input, output, session) {
             edit_onmyshelf <- input$edit_onmyshelf
         }
         
-        edit_score <- NA_character_
+        edit_score <- ""
         if (!is.null(input$edit_score)) { 
             edit_score <- input$edit_score
         }
