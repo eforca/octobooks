@@ -1198,31 +1198,23 @@ server <- function(input, output, session) {
                     html_attr("src") %>%
                     grep(isbn, .) %>% length()) {
                     
-                    imgsrc_init <- content(res_decitre) %>%
+                    
+                    imgsrc <- content(res_decitre) %>%
                         html_elements("img") %>%
                         html_attr("src") %>%
-                        grep(isbn, ., value = T) %>%
-                        `[[`(1) %>%
-                        str_extract(sprintf("(.*)(?=%s)", isbn)) 
-                    
-                    imgsrc <- sprintf("%s%s-475x500-2.webp", imgsrc_init, isbn)
+                        grep(isbn, ., value = T) %>% 
+                        grep(pattern = "475x500", value = T) %>%
+                        `[[`(1)
                     
                     urlImg <- "www/covers/temp_cover.jpg"
+                    if (download.file(imgsrc, destfile = urlImg)) {
+                        cat(sprintf("There was an error when downloading %s\n", imgsrc))
+                    } else {
+                        coverImg(urlImg)
+                        update_coverImage()
+                        reset_coverInput()
+                    }
                     
-                    tryCatch(
-                        expr = {
-                            download.file(imgsrc, destfile = urlImg)
-                        },
-                        error = function(e) {
-                            cat(sprintf("There was an error when downloading %s\n", imgsrc))
-                            imgsrc <- sprintf("%s%s-475x500-1.webp", imgsrc_init, isbn)
-                            download.file(imgsrc, destfile = urlImg)
-                        }
-                    )
-                    
-                    coverImg(urlImg)
-                    update_coverImage()
-                    reset_coverInput()
                     
                 } else if (values$settings$worldcat == "Oui") {
                     print("Trying Worldcat for cover")
