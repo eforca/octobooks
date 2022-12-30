@@ -1487,7 +1487,7 @@ server <- function(input, output, session) {
                 callback = JS("$.fn.dataTable.ext.errMode = 'alert';"),
                 options = list(
                     stateSave = TRUE,
-                    pageLength = config$settings$pageLength,
+                    # pageLength = config$settings$pageLength,
                     dom = paste0("<'row'<'col-sm-12'Q>>",
                                  "<'row edit_row'<'col-sm-6'B><'col-sm-6'f>>",
                                  "<'row'<'col-sm-12'tr>>",
@@ -1528,7 +1528,7 @@ server <- function(input, output, session) {
                     order = isolate(input$books_tbl_state$order),
                     # paging = TRUE,
                     # pageLength = isolate(input$books_tbl_state$length),
-                    pageLength = config$settings$pageLength,
+                    # pageLength = config$settings$pageLength,
                     dom = paste0("<'row'<'col-sm-12'Q>>",
                                  "<'row edit_row'<'col-sm-6'B><'col-sm-6'f>>",
                                  "<'row'<'col-sm-12'tr>>",
