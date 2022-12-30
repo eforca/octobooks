@@ -1,7 +1,7 @@
 #########################################################
-# Octobooks 1.0.2
+# Octobooks 1.1.1
 # Eliot Forcadell
-# 2022/09/13
+# 2022/12/30
 #########################################################
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(shiny, shinyjs, shinyWidgets, DT, yaml,
@@ -532,17 +532,17 @@ ui <- fluidPage(
                                                       status = "info")
                                   ),
                               ),
-                              fluidRow(
-                                  column(10,
-                                         awesomeRadio("set_worldcat",
-                                                      HTML("Optimiser la recherche d'image de courverture, notamment pour les éditions non-françaises :<br>
-                                                           <span style='font-weight:400; color:silver'>Attention, cette option peut rallonger significativement le temps de recherche</span>"),
-                                                      choices = c("Oui", "Non"),
-                                                      selected = config$settings$worldcat,
-                                                      inline = T,
-                                                      status = "info")
-                                  ),
-                              ),
+                              # fluidRow(
+                              #     column(10,
+                              #            awesomeRadio("set_worldcat",
+                              #                         HTML("Optimiser la recherche d'image de courverture, notamment pour les éditions non-françaises :<br>
+                              #                              <span style='font-weight:400; color:silver'>Attention, cette option peut rallonger significativement le temps de recherche</span>"),
+                              #                         choices = c("Oui", "Non"),
+                              #                         selected = config$settings$worldcat,
+                              #                         inline = T,
+                              #                         status = "info")
+                              #     ),
+                              # ),
                               fluidRow(
                                   column(10,
                                          colorPickr("set_themeColour", 
@@ -571,17 +571,17 @@ ui <- fluidPage(
                                   )
                               ),
                               br(),
-                              fluidRow(
-                                  column(8,
-                                         id = "set_pageLength_col",
-                                         selectInput("set_pageLength",
-                                                     HTML("Nombre de lignes à afficher dans le tableau :<br>
-                                                           <span style='font-weight:400; color:silver'>Attention, ce réglage ne s'appliquera qu'à la réouverture de l'application</span>"),
-                                                     choices = c(10, 25, 50, 100),
-                                                     width = "100%",
-                                                     selected = config$settings$pageLength)
-                                  ),
-                              ),
+                              # fluidRow(
+                              #     column(8,
+                              #            id = "set_pageLength_col",
+                              #            selectInput("set_pageLength",
+                              #                        HTML("Nombre de lignes à afficher dans le tableau :<br>
+                              #                              <span style='font-weight:400; color:silver'>Attention, ce réglage ne s'appliquera qu'à la réouverture de l'application</span>"),
+                              #                        choices = c(10, 25, 50, 100),
+                              #                        width = "100%",
+                              #                        selected = config$settings$pageLength)
+                              #     ),
+                              # ),
                               fluidRow(
                                   column(8,
                                          id = "set_isbnCase_col",
@@ -1198,31 +1198,23 @@ server <- function(input, output, session) {
                     html_attr("src") %>%
                     grep(isbn, .) %>% length()) {
                     
-                    imgsrc_init <- content(res_decitre) %>%
+                    
+                    imgsrc <- content(res_decitre) %>%
                         html_elements("img") %>%
                         html_attr("src") %>%
-                        grep(isbn, ., value = T) %>%
-                        `[[`(1) %>%
-                        str_extract(sprintf("(.*)(?=%s)", isbn)) 
-                    
-                    imgsrc <- sprintf("%s%s-475x500-2.webp", imgsrc_init, isbn)
+                        grep(isbn, ., value = T) %>% 
+                        grep(pattern = "475x500", value = T) %>%
+                        `[[`(1)
                     
                     urlImg <- "www/covers/temp_cover.jpg"
+                    if (download.file(imgsrc, destfile = urlImg)) {
+                        cat(sprintf("There was an error when downloading %s\n", imgsrc))
+                    } else {
+                        coverImg(urlImg)
+                        update_coverImage()
+                        reset_coverInput()
+                    }
                     
-                    tryCatch(
-                        expr = {
-                            download.file(imgsrc, destfile = urlImg)
-                        },
-                        error = function(e) {
-                            cat(sprintf("There was an error when downloading %s\n", imgsrc))
-                            imgsrc <- sprintf("%s%s-475x500-1.webp", imgsrc_init, isbn)
-                            download.file(imgsrc, destfile = urlImg)
-                        }
-                    )
-                    
-                    coverImg(urlImg)
-                    update_coverImage()
-                    reset_coverInput()
                     
                 } else if (values$settings$worldcat == "Oui") {
                     print("Trying Worldcat for cover")
@@ -1325,10 +1317,10 @@ server <- function(input, output, session) {
         
         onmyshelf <- FALSE
         if (!is.null(input$onmyshelf)) { 
-            onmyshelf <- input$onmyshelf
+            onmyshelf <- as.logical(input$onmyshelf)
         }
         
-        score <- NA_character_
+        score <- ""
         if (!is.null(input$score)) { 
             score <- input$score
         }
@@ -1351,9 +1343,6 @@ server <- function(input, output, session) {
         if (cover) {
             file.copy(coverImg(), urlImg, overwrite = T)
         }
-        
-        print(input$score)
-        print(input$onmyshelf)
         
         addbooks_df <- data.frame(
             isbn = input$isbn,
@@ -1414,11 +1403,8 @@ server <- function(input, output, session) {
             shinyjs::html("addMessage", HTML(mess))
             
             if (values$settings$reset == "Oui") {
-                print("je reset")
                 reset_add()
-            } else {
-                print("Je reset pas tu as cru quoi")
-            }
+            } 
         }
     })
     
@@ -1442,8 +1428,6 @@ server <- function(input, output, session) {
     
     
     fmt_tbl <- function(book_table, selcols = config$selected_cols) {
-        
-        print(book_table)
         
         book_table$read <- code_lu[book_table$read]
         
@@ -1866,8 +1850,6 @@ server <- function(input, output, session) {
     #### Récupération des valeurs du formulaire ----
     editForm <- reactive({
         
-        print(names(input))
-        
         edit_read_deb_date <- NA_POSIXct_
         if (!is.null(input$edit_read_deb_date)) { 
             edit_read_deb_date <- input$edit_read_deb_date
@@ -1877,13 +1859,12 @@ server <- function(input, output, session) {
             edit_read_fin_date <- input$edit_read_fin_date
         }
         
-        print(input$edit_onmyshelf)
         edit_onmyshelf <- FALSE
-        if (!is.null(input$edit_onmyshelf)) { 
-            edit_onmyshelf <- input$edit_onmyshelf
+        if (!is.null(input$edit_onmyshelf)) {
+            edit_onmyshelf <- as.logical(input$edit_onmyshelf)
         }
         
-        edit_score <- NA_character_
+        edit_score <- ""
         if (!is.null(input$edit_score)) { 
             edit_score <- input$edit_score
         }
@@ -1927,9 +1908,7 @@ server <- function(input, output, session) {
             score = edit_score,
             onmyshelf = edit_onmyshelf
         )
-        
-        print("Coucou editForm")
-        print(editForm)
+
         return(editForm)
     })
     
@@ -1957,8 +1936,6 @@ server <- function(input, output, session) {
             entry_form("submit_edit")
             
             book_values <- values$books_df[input$books_tbl_rows_selected,]
-            print("coucou book_values")
-            print(book_values)
             
             updateTextInput(session, "edit_isbn", value = book_values$isbn)
             updateCheckboxGroupButtons(session, "edit_onmyshelf", selected = book_values$onmyshelf)
@@ -1987,8 +1964,6 @@ server <- function(input, output, session) {
                                        selected = strsplit(book_values$genders, ";")[[1]])
             updateSelectInput(session, "edit_keywords", 
                               selected = strsplit(book_values$keywords, ";")[[1]])
-            
-            print(input$edit_title)
             
             # Format
             if(book_values$format == "Audio") {
@@ -2320,7 +2295,6 @@ server <- function(input, output, session) {
     
     observeEvent(input$change_default_button, {
         values$default_choices[[input$coltochange]] <- input$newdefvalue
-        # print(values$default_choices)
         write_yaml(values$default_choices, "config/default_choices.yml")
         shinyjs::html("newdefvalueMessage", HTML("<p class='success'>La valeur par défaut a bien été modifiée !</p>"))
     })
