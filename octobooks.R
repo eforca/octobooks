@@ -1326,11 +1326,11 @@ server <- function(input, output, session) {
         }
         
         nbpages <- NA
-        duree_h <- NA; duree_min <- NA
+        duree_h <- NA_integer_; duree_min <- NA_integer_
         interpreters <- NA_character_
         if(input$format == "Audio") {
-            duree_h <- input$duree_h
-            duree_min <- input$duree_min
+            duree_h <- fifelse(input$duree_h == "", 0, as.integer(input$duree_h))
+            duree_min <- fifelse(input$duree_min == "", 0, as.integer(input$duree_min))
             interpreters <- fifelse(length(int_inserted) == 0, NA_character_,
                                     fmt_semicol(sapply(int_inserted, function(x) input[[x]])))
         } else {
@@ -1361,8 +1361,8 @@ server <- function(input, output, session) {
             langue = input$langue,
             format = input$format,
             pages = as.integer(nbpages),
-            duree_h = as.integer(duree_h),
-            duree_min = as.integer(duree_min),
+            duree_h = duree_h,
+            duree_min = duree_min,
             owner = input$owner,
             read = input$read,
             read_deb_date = as.POSIXct(read_deb_date, tz = "GMT"),
@@ -1756,20 +1756,23 @@ server <- function(input, output, session) {
     
     #### Format : nombre de pages et durée ----
     observeEvent(input$edit_format, {
-        if (input$edit_format == "Audio") {
+        
+        if (input$edit_format == "Audio")  {
+            updateTextInput(session, inputId = "edit_nbpages", value = "")
+            disable(selector = "#edit_nbpages")
             enable(selector = "#edit_duree_h")
             enable(selector = "#edit_duree_min")
-            updateTextInput(session, inputId = "edit_nbpages", value = NA)
-            disable(selector = "#edit_nbpages")
             enable(selector = "#edit_interpreters")
-        } else {
+        }
+        
+        if (input$edit_format %in% c("Papier", "Numérique"))  {
+            updateTextInput(session, inputId = "edit_interpreters", value = "")
+            updateTextInput(session, inputId = "edit_duree_h", value = "")
+            updateTextInput(session, inputId = "edit_duree_min", value = "")
+            enable(selector = "#edit_nbpages")
             disable(selector = "#edit_duree_h")
             disable(selector = "#edit_duree_min")
-            updateTextInput(session, inputId = "edit_duree_h", value = NA)
-            updateTextInput(session, inputId = "edit_duree_min", value = NA)
-            enable(selector = "#edit_nbpages")
             disable(selector = "#edit_interpreters")
-            updateTextInput(session, inputId = "edit_interpreters", value = NA)
         }
     })
     
@@ -1874,6 +1877,16 @@ server <- function(input, output, session) {
             edit_score <- input$edit_score
         }
         
+        edit_nbpages <- NA
+        edit_duree_h <- NA_integer_; edit_duree_min <- NA_integer_
+        edit_interpreters <- NA_character_
+        if(input$edit_format == "Audio") {
+            edit_duree_h <- fifelse(input$edit_duree_h == "", 0, as.integer(input$edit_duree_h))
+            edit_duree_min <- fifelse(input$edit_duree_min == "", 0, as.integer(input$edit_duree_min))
+        } else {
+            edit_nbpages <- as.integer(input$edit_nbpages)
+        }
+        
         urlImg <- sprintf("www/covers/cover_%s.%s", input$edit_isbn, 
                           file_ext(edit_coverImg()))
         print(urlImg)
@@ -1894,9 +1907,9 @@ server <- function(input, output, session) {
             translators = fmt_semicol(str_trim(strsplit(input$edit_translators, ",")[[1]])),
             interpreters = fmt_semicol(str_trim(strsplit(input$edit_interpreters, ",")[[1]])),
             genders = paste(input$edit_genders, collapse = ";"),
-            pages = as.integer(input$edit_nbpages),
-            duree_h = as.integer(input$edit_duree_h),
-            duree_min = as.integer(input$edit_duree_min),
+            pages = edit_nbpages,
+            duree_h = edit_duree_h,
+            duree_min = edit_duree_min,
             genre = input$edit_genre,
             pub_date = as.integer(input$edit_pub_date),
             edition_date = as.integer(input$edit_edition_date),
@@ -1969,17 +1982,6 @@ server <- function(input, output, session) {
                                        selected = strsplit(book_values$genders, ";")[[1]])
             updateSelectInput(session, "edit_keywords", 
                               selected = strsplit(book_values$keywords, ";")[[1]])
-            
-            # Format
-            if(book_values$format == "Audio") {
-                enable(selector = "#edit_duree_h")
-                enable(selector = "#edit_duree_min")
-                disable(selector = "#edit_nbpages")
-            } else {
-                disable(selector = "#edit_duree_h")
-                disable(selector = "#edit_duree_min")
-                enable(selector = "#edit_nbpages")
-            }  
             
             # Dates
             if (book_values$read == "non") {
