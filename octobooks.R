@@ -1004,6 +1004,7 @@ server <- function(input, output, session) {
         intbtn_count(1)
         
         updateTextInput(session, "isbn", value = "")
+        updateCheckboxGroupButtons(session, "onmyshelf", selected = character(0))
         updateTextInput(session, "titre", value = "")
         updateTextInput(session, "nbpages", value = "")
         updateTextInput(session, "duree_h", value = "")
