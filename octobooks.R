@@ -1352,9 +1352,6 @@ server <- function(input, output, session) {
             file.copy(coverImg(), urlImg, overwrite = T)
         }
         
-        print(input$score)
-        print(input$onmyshelf)
-        
         addbooks_df <- data.frame(
             isbn = input$isbn,
             title = input$titre,
@@ -1414,11 +1411,8 @@ server <- function(input, output, session) {
             shinyjs::html("addMessage", HTML(mess))
             
             if (values$settings$reset == "Oui") {
-                print("je reset")
                 reset_add()
-            } else {
-                print("Je reset pas tu as cru quoi")
-            }
+            } 
         }
     })
     
@@ -1442,8 +1436,6 @@ server <- function(input, output, session) {
     
     
     fmt_tbl <- function(book_table, selcols = config$selected_cols) {
-        
-        print(book_table)
         
         book_table$read <- code_lu[book_table$read]
         
@@ -1866,8 +1858,6 @@ server <- function(input, output, session) {
     #### Récupération des valeurs du formulaire ----
     editForm <- reactive({
         
-        print(names(input))
-        
         edit_read_deb_date <- NA_POSIXct_
         if (!is.null(input$edit_read_deb_date)) { 
             edit_read_deb_date <- input$edit_read_deb_date
@@ -1877,10 +1867,9 @@ server <- function(input, output, session) {
             edit_read_fin_date <- input$edit_read_fin_date
         }
         
-        print(input$edit_onmyshelf)
         edit_onmyshelf <- FALSE
-        if (!is.null(input$edit_onmyshelf)) { 
-            edit_onmyshelf <- input$edit_onmyshelf
+        if (!is.null(input$edit_onmyshelf)) {
+            edit_onmyshelf <- as.logical(input$edit_onmyshelf)
         }
         
         edit_score <- ""
@@ -1927,9 +1916,7 @@ server <- function(input, output, session) {
             score = edit_score,
             onmyshelf = edit_onmyshelf
         )
-        
-        print("Coucou editForm")
-        print(editForm)
+
         return(editForm)
     })
     
@@ -1957,8 +1944,6 @@ server <- function(input, output, session) {
             entry_form("submit_edit")
             
             book_values <- values$books_df[input$books_tbl_rows_selected,]
-            print("coucou book_values")
-            print(book_values)
             
             updateTextInput(session, "edit_isbn", value = book_values$isbn)
             updateCheckboxGroupButtons(session, "edit_onmyshelf", selected = book_values$onmyshelf)
@@ -1987,8 +1972,6 @@ server <- function(input, output, session) {
                                        selected = strsplit(book_values$genders, ";")[[1]])
             updateSelectInput(session, "edit_keywords", 
                               selected = strsplit(book_values$keywords, ";")[[1]])
-            
-            print(input$edit_title)
             
             # Format
             if(book_values$format == "Audio") {
@@ -2320,7 +2303,6 @@ server <- function(input, output, session) {
     
     observeEvent(input$change_default_button, {
         values$default_choices[[input$coltochange]] <- input$newdefvalue
-        # print(values$default_choices)
         write_yaml(values$default_choices, "config/default_choices.yml")
         shinyjs::html("newdefvalueMessage", HTML("<p class='success'>La valeur par défaut a bien été modifiée !</p>"))
     })
