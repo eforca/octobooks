@@ -1325,7 +1325,7 @@ server <- function(input, output, session) {
         
         onmyshelf <- FALSE
         if (!is.null(input$onmyshelf)) { 
-            onmyshelf <- input$onmyshelf
+            onmyshelf <- as.logical(input$onmyshelf)
         }
         
         score <- ""
