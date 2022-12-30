@@ -196,8 +196,8 @@ ui <- fluidPage(
                                 ),
                             ),
                             checkboxGroupButtons("onmyshelf",
-                                                choices = c("Dans ma bibliothèque" = TRUE),
-                                                status = "theme-light"),
+                                                 choices = c("Dans ma bibliothèque" = TRUE),
+                                                 status = "theme-light"),
                             awesomeRadio("read", "Lu", 
                                          c("Non" = "non",
                                            "Oui" = "oui", 
@@ -373,7 +373,7 @@ ui <- fluidPage(
                  value = "table",
                  fluidRow(
                      id = "selcols-row",
-                     column(1),
+                     # column(1),
                      uiOutput("selcols"),
                  ),
                  tags$div(id = "table_div",
@@ -550,12 +550,12 @@ ui <- fluidPage(
                                                     selected = config$settings$themeColour,
                                                     update = "change",
                                                     swatches = c("#EEA236",
-                                                                 "#990000",
-                                                                 "#6A0D83",
-                                                                 "#0B0672",
-                                                                 "#89A6FF",
-                                                                 "#8BB9B9",
-                                                                 config$settings$themeColour),
+                                                                          "#990000",
+                                                                          "#6A0D83",
+                                                                          "#0B0672",
+                                                                          "#89A6FF",
+                                                                          "#8BB9B9",
+                                                                          config$settings$themeColour),
                                                     pickr_width = "20em",
                                                     theme = "monolith",
                                                     position = "right-end",
@@ -617,7 +617,7 @@ server <- function(input, output, session) {
     
     
     ## Ajouter ----
-
+    
     shinyjs::runjs("$('#pub_date, #edition_date').attr('maxlength', 4);")
     
     ### Listes dynamiques ----
@@ -661,7 +661,7 @@ server <- function(input, output, session) {
                           choices = values$choices$keywords)
         
     })
-
+    
     
     #### Date de lecture ----
     
@@ -1372,7 +1372,7 @@ server <- function(input, output, session) {
             score = score,
             onmyshelf = onmyshelf
         )
-
+        
         return(addbooks_df)
     })
     
@@ -1414,12 +1414,17 @@ server <- function(input, output, session) {
     ### Affichage du tableau ----
     
     output$selcols <- renderUI({
-        lapply(1:5, function(i) {
+        lapply(1:(length(labcols)%/%4 + 1), function(i) {
+            if (i > length(labcols)%/%4) {
+                li <- 4*i-3; hi <- 4*(i-1) + length(labcols)%%4
+            } else {
+                li <- 4*i-3; hi <- 4*i   
+            }
             column(2,
                    awesomeCheckboxGroup(paste0("selcols", i),
                                         label = NULL,
-                                        choices = setNames(names(labcols)[(4*i-3):(4*i)], 
-                                                           labcols[(4*i-3):(4*i)]),
+                                        choices = setNames(names(labcols)[li:hi], 
+                                                           labcols[li:hi]),
                                         selected = config$selected_cols,
                                         inline = F, status = "info")
             )
@@ -1467,7 +1472,7 @@ server <- function(input, output, session) {
     
     output$books_tbl <- DT::renderDataTable(expr = {
         selcols <- c(input$selcols1, input$selcols2, input$selcols3,
-                     input$selcols4, input$selcols5)
+                     input$selcols4, input$selcols5, input$selcols6)
         
         isolate(input$books_tbl_state$start)
         
@@ -1583,14 +1588,14 @@ server <- function(input, output, session) {
                     fluidRow(
                         column(4,
                                disabled(textInput("edit_isbn", config$settings$isbnCase)),
-                               ),
+                        ),
                         column(4,
                                checkboxGroupButtons("edit_onmyshelf",
                                                     label = " ",
                                                     choices = c("Dans ma bibliothèque" = TRUE),
                                                     justified = TRUE,
                                                     status = "theme-light")
-                               ),
+                        ),
                         column(4,
                                radioGroupButtons(
                                    inputId = "edit_score",
@@ -1602,7 +1607,7 @@ server <- function(input, output, session) {
                                    individual = TRUE,
                                    status = "theme-light"
                                )
-                               )
+                        )
                     ),
                     fluidRow(
                         column(8,
@@ -1777,7 +1782,7 @@ server <- function(input, output, session) {
             
             disable(id = "edit_read_deb_date")
             disable(id = "edit_read_fin_date")
-
+            
         } else {
             enable(id = "edit_read_deb_date")
             enable(id = "edit_score")
@@ -1908,7 +1913,7 @@ server <- function(input, output, session) {
             score = edit_score,
             onmyshelf = edit_onmyshelf
         )
-
+        
         return(editForm)
     })
     
@@ -2103,7 +2108,7 @@ server <- function(input, output, session) {
             return(d[read %in% lu,])
         }
     }
-
+    
     
     ### Bilan global ----
     
@@ -2246,20 +2251,27 @@ server <- function(input, output, session) {
     ### Colonnes sélectionnées par défaut ----
     output$select_newdefcols <- renderUI({
         fluidRow(
-            lapply(1:5, function(i) {
+            lapply(1:(length(labcols)%/%4 + 1), function(i) {
+                if (i > length(labcols)%/%4) {
+                    li <- 4*i-3; hi <- 4*(i-1) + length(labcols)%%4
+                } else {
+                    li <- 4*i-3; hi <- 4*i   
+                }
                 column(2,
                        awesomeCheckboxGroup(paste0("newdefcols", i),
                                             label = NULL,
-                                            choices = setNames(names(labcols)[(4*i-3):(4*i)], labcols[(4*i-3):(4*i)]),
-                                            selected = values$selected_cols,
-                                            inline = F, status = "info")) 
+                                            choices = setNames(names(labcols)[li:hi], 
+                                                               labcols[li:hi]),
+                                            selected = config$selected_cols,
+                                            inline = F, status = "info")
+                )
             })
         )
     })
     
     observeEvent(input$change_defcols_button, {
         newselcols <- c(input$newdefcols1, input$newdefcols2, input$newdefcols3, 
-                        input$newdefcols4, input$newdefcols5)
+                        input$newdefcols4, input$newdefcols5, input$newdefcols6)
         values$selected_cols <- newselcols
         
         for(i in 1:6) {
