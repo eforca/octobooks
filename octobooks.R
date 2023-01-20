@@ -2173,8 +2173,9 @@ server <- function(input, output, session) {
                              input$cat_onlyread, input$cat_readbydate,
                              input$cat_deb_read, input$cat_fin_read)
         
-        dtplot <- rbind(dtplot[, .N, by = sel_cat][order(-N)],
-                        dtplot[, .("Total", .N)], use.names = FALSE)
+        dtplot <- rbind(dtplot[, .(.N, p = paste0(round(.N*100/nrow(dtplot)), "%")), 
+                               by = sel_cat][order(-N)],
+                        dtplot[, .("Total", .N, "100%")], use.names = FALSE)
         
         if (sel_cat == "genders") {
             dtplot[, genders := sapply(genders, function(x) {
@@ -2186,11 +2187,11 @@ server <- function(input, output, session) {
             gt() %>%
             tab_options(table.font.size = px(14),
                         column_labels.border.top.style = "hidden") %>%
-            cols_label(.list = setNames(c("", "Livres"),
-                                        c(sel_cat, "N"))) %>%
-            cols_align(columns = 2, align = "center") %>%
+            cols_label(.list = setNames(c("", "Livres", "%"),
+                                        c(sel_cat, "N", "p"))) %>%
+            cols_align(columns = 2:3, align = "center") %>%
             cols_width(1 ~ px(200),
-                       2 ~ px(100)) %>%
+                       2:3 ~ px(75)) %>%
             tab_style(style = cell_borders(sides = "top",
                                            color = "#D3D3D3",
                                            weight = px(2)),
