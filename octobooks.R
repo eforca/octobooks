@@ -2174,6 +2174,14 @@ server <- function(input, output, session) {
                 melt(id.vars = "year", 
                      variable.name = sel_cat, value.name = "N")
             
+        } else if (sel_cat == "keywords") {
+            keywords_list <- sort(unique(unlist(str_split(d$keywords, ";"))))[-1]
+            dtplot <- d[, year := format(read_fin_date, "%Y")
+            ][, c(keywords_list) := lapply(keywords_list, grepl, keywords)
+            ][, lapply(.SD, sum), .SDcols = keywords_list, keyby = year] %>%
+                melt(id.vars = "year", 
+                     variable.name = sel_cat, value.name = "N")
+            
         } else {
             dtplot <- d[, year := format(read_fin_date, "%Y")
             ][, .N, keyby = c("year", sel_cat)]
@@ -2192,8 +2200,13 @@ server <- function(input, output, session) {
         dtplot <- fmt_dtplot(values$books_df, sel_cat)
         sel_year <- "Total"
         
-        dtplot <- rbind(dtplot[year == sel_year, .(sel_cat, N, p = paste0(round(p*100), "%"))],
-              dtplot[year == sel_year, .("Total", sum(N), "100%")], use.names = FALSE)
+        if (sel_cat %in% c("genders", "keywords")) {
+            dtplot <- dtplot[year == sel_year, .(sel_cat, N, p = paste0(round(p*100), "%"))]
+        } else {
+            dtplot <- rbind(dtplot[year == sel_year, .(sel_cat, N, p = paste0(round(p*100), "%"))],
+                            dtplot[year == sel_year, .("Total", sum(N), "100%")], use.names = FALSE)
+        }
+        
         
         print(dtplot)
         
@@ -2209,7 +2222,7 @@ server <- function(input, output, session) {
                        2:3 ~ px(75)) %>%
             tab_style(style = cell_borders(sides = "top",
                                            color = "#D3D3D3",
-                                           weight = px(2)),
+                                           weight = fifelse(sel_cat %in% c("genders", "keywords"), px(1), px(2))),
                       locations = cells_body(rows = nrow(dtplot)))
     }
     )
@@ -2221,6 +2234,8 @@ server <- function(input, output, session) {
         
         if (nrow(dtplot)) {
             
+            dtplot <- dtplot[sel_cat %in% dtplot[year == "Total", sel_cat][1:9]]
+            
             if (sel_cat %in% c("langue", "format")) {
             # if (FALSE) {
                 dtplot %>%
@@ -2231,14 +2246,29 @@ server <- function(input, output, session) {
                     scale_fill_brewer("", palette = "Pastel1") +
                     coord_polar("y", start = 0) +
                     geom_text(aes(label = fifelse(p <= 0.05, "", 
-                                                  paste0(round(p*100), "%"))),
+                                                  paste0(round(p*100)))),
                               position = position_stack(vjust = 0.5),
                               size = 4.5) +
                     facet_wrap(~year, nrow = 3) +
                     theme_void() +
                     theme(text = element_text(size = 16))
+            } else if (sel_cat %in% c("genders", "keywords")) {
+                
+                dtplot %>%
+                    ggplot(aes(x = "", 
+                               y = p, 
+                               fill = factor(sel_cat, 
+                                             levels = dtplot[year == "Total", sel_cat]))) +
+                    geom_bar(stat = "identity", width = 1, position = "dodge") +
+                    scale_fill_brewer("", palette = "Pastel1") +
+                    geom_text(aes(label = fifelse(p == 0, "", paste0(round(p*100))),
+                                  vjust = -0.25),
+                              position = position_dodge(width = 1),
+                              size = 4.5) +
+                    facet_wrap(~year, nrow = 2) +
+                    theme_void() +
+                    theme(text = element_text(size = 16))
             } else {
-
                 dtplot %>% 
                     ggplot(aes(x = "", 
                                y = p, 
@@ -2247,7 +2277,7 @@ server <- function(input, output, session) {
                     geom_bar(stat = "identity", width = 1) +
                     scale_fill_brewer("", palette = "Pastel1") +
                     geom_text(aes(label = fifelse(p <= 0.05, "", 
-                                                  paste0(round(p*100), "%"))),
+                                                  paste0(round(p*100)))),
                               position = position_stack(vjust = 0.5),
                               size = 4.5) +
                     facet_wrap(~year, nrow = 2) +
