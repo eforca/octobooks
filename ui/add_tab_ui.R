@@ -37,14 +37,22 @@ tabPanel("Ajouter",
              # Panel central
              column(9,
                     id = "add-panel",
-                    
                     fluidRow(
-                        
                         column(8,
+                               
                                # Titre
                                textInput("titre", h3("Titre"),
                                          placeholder = "",
                                          width = "100%"),
+                               
+                               # Titre VO
+                               hidden(
+                               tags$div(id = "titreVoDiv",
+                                        textInput("titre_vo",
+                                                  "Titre original",
+                                                  placeholder = "",
+                                                  width = "100%")
+                               )),
                                
                                # Auteurices
                                tags$div(id = "auteuricesMainDiv",

@@ -352,6 +352,21 @@ observeEvent(input$removeIntBtn, {
 })
 
 
+# Titre VO ----
+title_vo_shown <- reactiveVal(FALSE)
+observe({
+    if (!title_vo_shown()) {
+        if (input$langue_vo != "" & input$langue != "" &
+            input$langue_vo != input$langue) {
+            showElement("titreVoDiv")
+            title_vo_shown(TRUE)
+        }
+    } else if (input$langue_vo == input$langue) {
+        hideElement("titreVoDiv")
+        title_vo_shown(FALSE)
+    }
+})
+
 
 # Réinitialisation des inputs ----
 
@@ -436,7 +451,7 @@ observeEvent(input$tabs, {
 })
 
 
-### Requête ISBN ----
+# Requête ISBN ----
 
 update_add <- function(res_data) {
     
@@ -528,7 +543,7 @@ observeEvent(input$isbnButton, {
     wc_tried_img <- FALSE
     
     
-    #### Info ----
+    ## Info ----
     
     if (!grepl(pattern = "^[0-9]+$", isbn)) {
         updateTextInput(inputId = "titre", value = "isbn non conforme")
@@ -577,7 +592,7 @@ observeEvent(input$isbnButton, {
         }
         
         
-        #### Téléchargement de l'image de couverture ----
+        ## Téléchargement de l'image de couverture ----
         
         if (coverImg() == "www/covers/dummy_cover.jpg") {
             
@@ -741,6 +756,7 @@ addbooks_df <- reactive({
     addbooks_df <- data.frame(
         isbn = input$isbn,
         title = input$titre,
+        title_vo = input$titre_vo,
         authors = fifelse(length(aut_inserted) == 0, NA_character_,
                           fmt_semicol(sapply(aut_inserted, function(x) input[[x]]))),
         translators = fifelse(length(trad_inserted) == 0, NA_character_,

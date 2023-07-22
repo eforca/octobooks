@@ -35,6 +35,7 @@ if (!file.exists("data")) dir.create("data")
 if (!file.exists("data/octobooks.csv")) {
     fwrite(data.table(isbn = character(),
                       title = character(),
+                      title_vo = character(),
                       authors = character(),
                       translators = character(),
                       interpreters = character(),
@@ -87,7 +88,8 @@ sapply(setdiff(list.files("www/covers/"), list.files("data/covers/")),
 
 # Importation de la base
 books <- fread("data/octobooks.csv", integer64 = "character",
-               colClasses = list(character=c("title", "authors", "translators", "interpreters",
+               colClasses = list(character=c("title", "title_vo", 
+                                             "authors", "translators", "interpreters",
                                              "genders", "genre", "langue_vo", 
                                              "pays_vo", "langue", "format",
                                              "owner", "read", "keywords", "score"),
@@ -120,6 +122,7 @@ config <- sapply(config_files, function(f) {
 
 labcols <- c(isbn = config$settings$isbnCase, 
              title = "Titre", 
+             title_vo = "Titre original",
              authors = "Auteurices",
              translators = "Traducteurices",
              interpreters = "Interprètes",

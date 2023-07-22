@@ -203,6 +203,7 @@ entry_form <- function(button_id) {
                 fluidRow(
                     column(8,
                            textInput("edit_title", "Titre", width = "100%"),
+                           textInput("edit_title_vo", "Titre original", width = "100%"),
                            textInput("edit_authors", "Auteurices", width = "100%"),
                            textInput("edit_translators", "Traducteurices", width = "100%"),
                            textInput("edit_interpreters", "Interprètes", width = "100%"),
@@ -374,6 +375,7 @@ observeEvent(input$edit_button, {
         updateRadioGroupButtons(session, "edit_score", selected = book_values$score)
         
         updateTextInput(session, "edit_title", value = book_values$title)
+        updateTextInput(session, "edit_title_vo", value = book_values$title_vo)
         updateTextInput(session, "edit_nbpages", value = book_values$pages)
         updateTextInput(session, "edit_duree_h", value = book_values$duree_h)
         updateTextInput(session, "edit_duree_min", value = str_pad(book_values$duree_min, 2, "left", 0))
@@ -396,6 +398,11 @@ observeEvent(input$edit_button, {
                                    selected = strsplit(book_values$genders, ";")[[1]])
         updateSelectInput(session, "edit_keywords", 
                           selected = strsplit(book_values$keywords, ";")[[1]])
+        
+        # Titre original
+        # if (book_values$langue == book_values$langue_vo) {
+        #     disable("edit_title_vo")
+        # }
         
         # Dates
         if (book_values$read == "non") {
@@ -442,6 +449,17 @@ observeEvent(input$edit_button, {
     }
 })
 
+### Format titre original ----
+edit_title_vo_shown <- reactiveVal(FALSE)
+observe({
+    req(input$edit_langue_vo)
+    req(input$edit_langue)
+    
+    if (input$edit_langue_vo == input$edit_langue) {
+        updateTextInput(session, inputId = "edit_title_vo", value = "")
+    }
+    toggleState("edit_title_vo", condition = (input$edit_langue_vo != input$edit_langue))
+})
 
 ### Format nombre de pages et durée ----
 observeEvent(input$edit_format, {
@@ -593,6 +611,7 @@ editForm <- reactive({
     editForm <- data.frame(
         isbn = input$edit_isbn,
         title = input$edit_title,
+        title_vo = input$edit_title_vo,
         authors = fmt_semicol(str_trim(strsplit(input$edit_authors, ",")[[1]])),
         translators = fmt_semicol(str_trim(strsplit(input$edit_translators, ",")[[1]])),
         interpreters = fmt_semicol(str_trim(strsplit(input$edit_interpreters, ",")[[1]])),
@@ -624,11 +643,15 @@ observeEvent(input$submit_edit, {
     
     edit_values <- editForm()
     
-    cols <- c("title", "authors", "translators", "interpreters", "genders", "genre", 
-              "pub_date", "edition_date", "langue_vo", "pays_vo", "langue", 
+    # Remplacer par names(books) ?
+    cols <- c("title", "title_vo", 
+              "authors", "translators", "interpreters", 
+              "genders", "genre", 
+              "pub_date", "edition_date", 
+              "langue_vo", "pays_vo", "langue", 
               "format",  "pages", "duree_h", "duree_min", "owner", 
-              "read", "read_deb_date", "read_fin_date", "keywords", "cover",
-              "score", "onmyshelf")
+              "read", "read_deb_date", "read_fin_date", 
+              "keywords", "cover", "score", "onmyshelf")
     values$books_df[input$books_tbl_row_last_clicked, cols] <- edit_values[cols]
     
     update_db()

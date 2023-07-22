@@ -13,7 +13,7 @@
 # Bilan global ----
 
 output$plot_count <- renderPlot({
-    d <- values$books_df
+    d <- copy(values$books_df)
     d[, `:=`(year = fcase(read != "oui", "Non lu",
                           is.na(read_fin_date), "Non daté",
                           rep_len(TRUE, nrow(d)), format(read_fin_date, "%Y")),
