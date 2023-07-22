@@ -58,22 +58,13 @@ observeEvent(input$read, {
                 selector = "#read_date_div",
                 where = "beforeEnd",
                 ui = tags$div(id = "read_date_subdiv",
+                              style = "width: 304px; max-width: 100%;",
                               tags$div(id = "read_deb_date_div",
                                        airDatepickerInput("read_deb_date",
                                                           label = "Début de lecture",
                                                           language = "fr",
                                                           todayButton = T,
                                                           autoClose = TRUE)),
-                              # checkboxInput("read_date_na",
-                              #               "Je ne sais plus",
-                              #               value = FALSE)
-                              # HTML('<div class="rating">
-                              #        <i class="rating__star far fa-star"></i>
-                              #        <i class="rating__star far fa-star"></i>
-                              #        <i class="rating__star far fa-star"></i>
-                              #        <i class="rating__star far fa-star"></i>
-                              #        <i class="rating__star far fa-star"></i>
-                              #       </div>')
                               radioGroupButtons(
                                   inputId = "score",
                                   label = "Note",

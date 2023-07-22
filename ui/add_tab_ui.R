@@ -115,7 +115,7 @@ tabPanel("Ajouter",
                         ),
                     ),
                     
-                    # Genre littéraire, langue originale originale
+                    # Genre littéraire, langue originale
                     fluidRow(
                         column(4, 
                                selectInput("genre", "Genre littéraire",
@@ -129,6 +129,7 @@ tabPanel("Ajouter",
                         ),
                         column(4,
                                splitLayout(
+                                   style = "width: 296px; max-width: 100%;",
                                    selectInput("langue_vo",
                                                "Langue originale",
                                                choices = config$choices$langue_vo,
