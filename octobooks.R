@@ -2119,22 +2119,62 @@ server <- function(input, output, session) {
     
     output$plot_count <- renderPlot({
         d <- values$books_df
-        rbind(
-            rbind(d[, .(x = "Total", .N)],
-                  d[read == "oui", .(x = "Lu", .N)])[, numplot := 1],
-            d[, .N, by = .(x = format(read_fin_date, "%Y"))
-            ][is.na(x), x := "Non daté"][, numplot := 2]
-        ) %>%
-            ggplot(aes(x = x, y = N, label = N)) +
-            geom_bar(stat = "identity") +
+        d[, `:=`(year = fcase(read != "oui", "Non lu",
+                              is.na(read_fin_date), "Non daté",
+                              rep_len(TRUE, nrow(d)), format(read_fin_date, "%Y")),
+                 status = fcase(read != "oui" & onmyshelf, "Pas lu\ndans ma bibli",
+                                read == "oui" & onmyshelf, "Lu\ndans ma bibli",
+                                read == "oui" & !onmyshelf, "Lu\npas dans ma bibli"))]
+        
+        dtplot <- rbind(
+            d[, .N, by = .(x = status)][, numplot := 1],
+            d[, .N, by = .(x = year)][, numplot := 2])
+        
+        dtplot[numplot == 2] %>%
+            ggplot(aes(x = factor(x, levels = c("Pas lu\ndans ma bibli", 
+                                                "Lu\ndans ma bibli",
+                                                "Lu\npas dans ma bibli",
+                                                "Non lu",
+                                                "Non daté",
+                                                sort(grep("[0-9]+", dtplot$x, value = T)))), 
+                       y = N, label = N)) +
+            geom_bar(stat = "identity", fill = values$settings$themeColour) +
             scale_y_continuous(limits = c(0, d[, .N] + 10)) +
             geom_text(vjust = -0.5, size = 5) +
-            facet_wrap(~numplot, scales = "free_x") +
+            # facet_wrap(~numplot, scales = "free_x") +
             labs(y = NULL, x = NULL) +
             theme(text = element_text(size = 16),
                   panel.grid.major.x = element_blank(),
                   strip.background = element_blank(),
                   strip.text = element_blank())
+    })
+    
+    output$plot_count_month <- renderPlot({
+        d <- values$books_df[!is.na(read_fin_date)]
+        
+        mois <- c("jan.", "fév.", "mars", "avril", "mai", "juin", 
+                  "juil.", "août", "sept.", "oct.", "nov.", "déc.")
+
+        dtplot <- d[, .N, keyby = .(year, month)]
+        rbind(dtplot,
+              dtplot[, .(year = "Total", N = sum(N)), by = month])
+        
+        dtplot %>%
+            ggplot(aes(x = forcats::fct_rev(factor(month, labels = mois)),
+                       y = N, label = N)) +
+            # geom_bar(stat = "identity", fill = values$settings$themeColour) +
+            geom_bar(stat = "identity") +
+            scale_y_continuous(limits = c(0, max(dtplot$N) + 10)) +
+            geom_text(size = 4.5, hjust = -0.5) +
+            # facet_wrap(~numplot, scales = "free_x") +
+            labs(y = NULL, x = NULL) +
+            coord_flip() +
+            facet_wrap(~year) +
+            theme(text = element_text(size = 16),
+                  panel.grid = element_blank()
+                  # strip.background = element_blank(),
+                  # strip.text = element_blank()
+                  )
     })
     
     
