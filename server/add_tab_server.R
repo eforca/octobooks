@@ -1,45 +1,60 @@
-shinyjs::runjs("$('#pub_date, #edition_date').attr('maxlength', 4);")
+shinyjs::runjs("$('#pub_date, #edition_date, #acqui_date').attr('maxlength', 4);")
 
 # Listes dynamiques ----
 
 observe({
+    updateCheckboxGroupButtons(session,
+                               "onmyshelf",
+                               selected = values$default_choices$onmyshelf)
+}) 
+observe({
     updateAwesomeRadio(session,
                        "read",
                        selected = values$default_choices$read)
-    
+}) 
+observe({
     updateSelectInput(session,
                       "genre",
                       choices = values$choices$genre,
                       selected = values$default_choices$genre)
-    
+}) 
+observe({    
     updateSelectInput(session,
                       "langue_vo",
                       choices = values$choices$langue_vo,
                       selected = values$default_choices$langue_vo)
+}) 
+observe({
     updateSelectInput(session, 
                       "pays_vo",
                       choices = values$choices$pays_vo,
                       selected = "")
-    
+}) 
+observe({
     updateSelectInput(session,
                       "format",
                       choices = values$choices$format,
                       selected = values$default_choices$format)
-    
+}) 
+
+observe({   
     updateSelectInput(session,
                       "langue",
                       choices = values$choices$langue,
                       selected = values$default_choices$langue)
-    
+}) 
+
+observe({ 
     updateSelectInput(session,
                       "owner",
                       choices = values$choices$owner,
                       selected = values$default_choices$owner)
-    
+}) 
+
+observe({  
     updateSelectInput(session,
                       "keywords",
                       choices = values$choices$keywords)
-    
 })
 
 
@@ -304,7 +319,7 @@ observeEvent(input$format, {
         # Interprètes
         insertUI(
             selector = "#traducteuricesMainDiv",
-            where = "afterEnd",
+            where = "beforeBegin",
             ui = div(id = "interpretesMainDiv",
                      strong("Interprètes"),
                      actionButton('insertIntBtn', '+', 
@@ -760,6 +775,9 @@ addbooks_df <- reactive({
         langue_vo = input$langue_vo,
         pays_vo = input$pays_vo,
         langue = input$langue,
+        acqui_type = input$acqui_type,
+        acqui_date = input$acqui_date,
+        acqui_state = input$acqui_state,
         format = input$format,
         pages = as.integer(nbpages),
         duree_h = duree_h,
@@ -771,7 +789,8 @@ addbooks_df <- reactive({
         keywords = paste(input$keywords, collapse = ";"),
         cover = cover,
         score = score,
-        onmyshelf = onmyshelf
+        onmyshelf = onmyshelf,
+        signed = input$signed
     )
     
     return(addbooks_df)
@@ -793,9 +812,18 @@ observeEvent(input$add_button, {
         shinyjs::html("addMessage", HTML(sprintf('<p class="error">%s</p>', "Année de première parution non numérique")))
     } else if (!str_isnum(input$edition_date)) {
         shinyjs::html("addMessage", HTML(sprintf('<p class="error">%s</p>', "Année d'édition non numérique")))
+    } else if (!str_isnum(input$acqui_date)) {
+        shinyjs::html("addMessage", HTML(sprintf('<p class="error">%s</p>', "Année d'acquisition non numérique")))
+    # } else if (as.integer(input$edition_date) < as.integer(input$pub_date)) {
+    #     shinyjs::html("addMessage", HTML(sprintf('<p class="error">%s</p>', "L'année d'édition est antérieure à l'année de première publication")))
+    # } else if (as.integer(input$acqui_date) < as.integer(input$edition_date)) {
+    #     shinyjs::html("addMessage", HTML(sprintf('<p class="error">%s</p>', "L'année d'acquisition est antérieure à l'année d'édition")))
     } else if (input$isbn %in% values$books_df$isbn) {
         shinyjs::html("addMessage", HTML(sprintf('<p class="error">%s</p>', "ISBN déjà présent dans la base")))
     } else {
+        
+        print(names(addbooks_df()))
+        print(names(values$books_df))
         values$books_df <- rbindlist(list(values$books_df, addbooks_df()))
         update_db()
         

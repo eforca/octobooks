@@ -1,11 +1,11 @@
 # Colonnes sélectionnées par défaut ----
 output$select_newdefcols <- renderUI({
     fluidRow(
-        lapply(1:(length(labcols)%/%4 + 1), function(i) {
-            if (i > length(labcols)%/%4) {
-                li <- 4*i-3; hi <- 4*(i-1) + length(labcols)%%4
+        lapply(1:(length(labcols)%/%nb_per_col + 1), function(i) {
+            if (i > length(labcols)%/%nb_per_col) {
+                li <- nb_per_col*i-(nb_per_col-1); hi <- nb_per_col*(i-1) + length(labcols)%%nb_per_col
             } else {
-                li <- 4*i-3; hi <- 4*i   
+                li <- nb_per_col*i-(nb_per_col-1); hi <- nb_per_col*i   
             }
             column(2,
                    awesomeCheckboxGroup(paste0("newdefcols", i),
@@ -40,7 +40,7 @@ observeEvent(c(input$newdefcols), {
 
 
 
-# Modification des choix par défaut ----
+# Choix par défaut ----
 
 output$defvalue <- renderUI({
     
@@ -48,6 +48,9 @@ output$defvalue <- renderUI({
         availchoices <- c("Non" = "non", 
                           "Oui" = "oui", 
                           "Pas fini" = "dnf")
+    } else if (input$coltochange == "onmyshelf") {
+        availchoices <- c("Non" = FALSE, 
+                          "Oui" = TRUE)
     } else {
         availchoices <- values$choices[[input$coltochange]]
     }

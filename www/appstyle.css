@@ -147,6 +147,8 @@ h2 {
 #side-panel .well {
     margin-right: 15px;
     /*padding-bottom: 31px;*/
+    width: 304px;
+    max-width: 100%;
 }
 
 #isbn-label {
@@ -178,6 +180,8 @@ div[data-value=ajouter] > div.container-fluid {
 #imageDiv, #edit_imageDiv {
     text-align: center;
     padding-left: 7px;
+    width: 300px;
+    max-width: 100%;
 }
 
 /*#imageSubDiv, #edit_imageSubDiv {

@@ -50,6 +50,9 @@ if (!file.exists("data/octobooks.csv")) {
                       pages = integer(),
                       duree_h = integer(),
                       duree_min = integer(),
+                      acqui_type = character(),
+                      acqui_date = integer(),
+                      acqui_state = character(),
                       owner = character(),
                       read = character(),
                       read_deb_date = POSIXct(),
@@ -57,7 +60,8 @@ if (!file.exists("data/octobooks.csv")) {
                       keywords = character(), 
                       cover = logical(),
                       score = character(),
-                      onmyshelf = logical()),
+                      onmyshelf = logical(), 
+                      signed = logical()),
            "data/octobooks.csv")
 }
 
@@ -92,11 +96,12 @@ books <- fread("data/octobooks.csv", integer64 = "character",
                                              "authors", "translators", "interpreters",
                                              "genders", "genre", "langue_vo", 
                                              "pays_vo", "langue", "format",
+                                             "acqui_type", "acqui_state",
                                              "owner", "read", "keywords", "score"),
-                                 integer=c("pub_date", "edition_date", "pages", 
-                                           "duree_h", "duree_min"),
+                                 integer=c("pub_date", "edition_date", "acqui_date",
+                                           "pages", "duree_h", "duree_min"),
                                  # POSIXct=c("read_deb_date", "read_fin_date"),
-                                 logical=c("cover", "onmyshelf")))
+                                 logical=c("cover", "onmyshelf", "signed")))
 books[, read_deb_date := as.POSIXct(read_deb_date, tz = "GMT")]
 books[, read_fin_date := as.POSIXct(read_fin_date, tz = "GMT")]
 
@@ -120,6 +125,7 @@ config <- sapply(config_files, function(f) {
     }
 })
 
+# Noms des colonnes du tableau de données
 labcols <- c(isbn = config$settings$isbnCase, 
              title = "Titre", 
              title_vo = "Titre original",
@@ -132,14 +138,21 @@ labcols <- c(isbn = config$settings$isbnCase,
              edition_date = "Édition",
              langue_vo = "Langue VO",
              langue = "Langue",
+             acqui_type = "Type d'acquisition",
+             acqui_date = "Date d'acquisition",
+             acqui_state = "État d'acquisition",       
              format = "Format",
              pages = "Pages",
              duree = "Durée",
              owner = "Propriétaire",
              read = "Lu",
              onmyshelf = "Dans ma bibli",
+             signed = "Dédicacé",
              read_deb_date = "Date début", 
              read_fin_date = "Date fin", 
              score = "Note",
              keywords = "Mots-clés",
              cover = "Couverture")
+
+# Nombre de variables par colonne pour le choix des variables du tableau
+nb_per_col <- ceiling(length(labcols)/6)

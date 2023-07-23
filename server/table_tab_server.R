@@ -2,11 +2,11 @@
 
 ## Choix de colonnes ----
 output$selcols <- renderUI({
-    lapply(1:(length(labcols)%/%4 + 1), function(i) {
-        if (i > length(labcols)%/%4) {
-            li <- 4*i-3; hi <- 4*(i-1) + length(labcols)%%4
+    lapply(1:(length(labcols)%/%nb_per_col + 1), function(i) {
+        if (i > length(labcols)%/%nb_per_col) {
+            li <- nb_per_col*i-(nb_per_col-1); hi <- nb_per_col*(i-1) + length(labcols)%%nb_per_col
         } else {
-            li <- 4*i-3; hi <- 4*i   
+            li <- nb_per_col*i-(nb_per_col-1); hi <- nb_per_col*i   
         }
         column(2,
                awesomeCheckboxGroup(paste0("selcols", i),
@@ -52,6 +52,7 @@ fmt_tbl <- function(book_table, selcols = config$selected_cols) {
     book_table$cover <- fifelse(book_table$cover, "Oui", "Non")
     book_table$score <- fifelse(book_table$score == "*", "★", book_table$score)
     book_table$onmyshelf <- fifelse(book_table$onmyshelf, "Oui", "Non")
+    book_table$signed <- fifelse(book_table$signed, "Oui", "Non")
     
     
     
@@ -210,9 +211,10 @@ entry_form <- function(button_id) {
                            awesomeCheckboxGroup("edit_genders",
                                                 NULL,
                                                 choices = setNames(names(code_genders), code_genders),
-                                                inline = T, status = "info")),
+                                                inline = T, status = "info")
+                    ),
                     column(4,
-                           div(
+                           tags$div(
                                id = "edit_imageDiv",
                                div(
                                    id = "edit_imageSubDiv",
@@ -236,7 +238,16 @@ entry_form <- function(button_id) {
                                                 label = "x"),
                                    # uiOutput("edit_resetupload"),
                                    cellWidths = c("76.5%", "15%")
-                               ))
+                               )
+                           ),
+                           tags$div(
+                               style = "margin-top: 30px;",
+                               checkboxGroupButtons("edit_signed",
+                                                    label = " ",
+                                                    choices = c("Dédicacé" = TRUE),
+                                                    justified = TRUE,
+                                                    status = "theme-light")
+                           )
                     ),
                 ),
                 
@@ -290,9 +301,9 @@ entry_form <- function(button_id) {
                 
                 fluidRow(
                     column(4,
-                           selectInput("edit_owner",
-                                       "Propriétaire",
-                                       choices = values$choices$owner)
+                           selectInput("edit_format",
+                                       "Format",
+                                       choices = values$choices$format)
                     ),
                     column(4,
                            textInput("edit_edition_date",
@@ -307,16 +318,22 @@ entry_form <- function(button_id) {
                 
                 fluidRow(
                     column(4,
-                           selectInput("edit_keywords",
-                                       "Mots-clés",
-                                       multiple = T,
-                                       choices = values$choices$keywords)
-                    ), 
-                    column(4,
-                           selectInput("edit_format",
-                                       "Format",
-                                       choices = values$choices$format)
+                           selectInput("edit_acqui_type",
+                                       "Type d'acquisition",
+                                       choices = values$choices$acqui_type)
                     ),
+                    column(4,
+                           textInput("edit_acqui_date",
+                                     "Date d'acquisition")
+                    ),
+                    column(4,
+                           selectInput("edit_acqui_state",
+                                       "État d'acquisition",
+                                       choices = values$choices$acqui_state)
+                    )
+                ),
+                
+                fluidRow(
                     column(4, 
                            splitLayout(
                                textInput("edit_nbpages", "Pages",
@@ -333,10 +350,19 @@ entry_form <- function(button_id) {
                                    cellWidths = c("45%","2%", "40%", "13%")),
                                cellWidths = c("55%", "45%")
                            )
-                           
                     ),
-                    
-                ),
+                    column(4,
+                           selectInput("edit_owner",
+                                       "Propriétaire",
+                                       choices = values$choices$owner)
+                    ),
+                    column(4,
+                           selectInput("edit_keywords",
+                                       "Mots-clés",
+                                       multiple = T,
+                                       choices = values$choices$keywords)
+                    )
+                )
             ),
             easyClose = TRUE,
             footer = tagList(modalButton("Annuler"),
@@ -373,6 +399,7 @@ observeEvent(input$edit_button, {
         updateTextInput(session, "edit_isbn", value = book_values$isbn)
         updateCheckboxGroupButtons(session, "edit_onmyshelf", selected = book_values$onmyshelf)
         updateRadioGroupButtons(session, "edit_score", selected = book_values$score)
+        updateCheckboxGroupButtons(session, "edit_signed", selected = book_values$signed)
         
         updateTextInput(session, "edit_title", value = book_values$title)
         updateTextInput(session, "edit_title_vo", value = book_values$title_vo)
@@ -386,6 +413,9 @@ observeEvent(input$edit_button, {
         updateSelectInput(session, "edit_langue_vo", selected = book_values$langue_vo)
         updateSelectInput(session, "edit_pays_vo", selected = book_values$pays_vo)
         updateSelectInput(session, "edit_langue", selected = book_values$langue)
+        updateSelectInput(session, "edit_acqui_type", selected = book_values$acqui_type)
+        updateTextInput(session, "edit_acqui_date", value = book_values$acqui_date)
+        updateSelectInput(session, "edit_acqui_state", selected = book_values$acqui_state)
         updateSelectInput(session, "edit_format", selected = book_values$format)
         updateSelectInput(session, "edit_owner", selected = book_values$owner)
         updateTextInput(session, "edit_authors", 
@@ -580,6 +610,11 @@ editForm <- reactive({
         edit_onmyshelf <- as.logical(input$edit_onmyshelf)
     }
     
+    edit_signed <- FALSE
+    if (!is.null(input$edit_signed)) {
+        edit_signed <- as.logical(input$edit_signed)
+    }
+    
     edit_score <- ""
     if (!is.null(input$edit_score)) { 
         edit_score <- input$edit_score
@@ -625,6 +660,9 @@ editForm <- reactive({
         langue_vo = input$edit_langue_vo,
         pays_vo = input$edit_pays_vo,
         langue = input$edit_langue,
+        acqui_type = input$edit_acqui_type,
+        acqui_date = as.integer(input$edit_acqui_date),
+        acqui_state = input$edit_acqui_state,
         format = input$edit_format,
         owner = input$edit_owner,
         read = input$edit_read,
@@ -633,7 +671,8 @@ editForm <- reactive({
         keywords = paste(input$edit_keywords, collapse = ";"),
         cover = edit_cover,
         score = edit_score,
-        onmyshelf = edit_onmyshelf
+        onmyshelf = edit_onmyshelf,
+        signed = edit_signed
     )
     
     return(editForm)
@@ -644,14 +683,15 @@ observeEvent(input$submit_edit, {
     edit_values <- editForm()
     
     # Remplacer par names(books) ?
-    cols <- c("title", "title_vo", 
-              "authors", "translators", "interpreters", 
-              "genders", "genre", 
-              "pub_date", "edition_date", 
-              "langue_vo", "pays_vo", "langue", 
-              "format",  "pages", "duree_h", "duree_min", "owner", 
-              "read", "read_deb_date", "read_fin_date", 
-              "keywords", "cover", "score", "onmyshelf")
+    # cols <- c("title", "title_vo", 
+    #           "authors", "translators", "interpreters", 
+    #           "genders", "genre", 
+    #           "pub_date", "edition_date", 
+    #           "langue_vo", "pays_vo", "langue", 
+    #           "format",  "pages", "duree_h", "duree_min", "owner", 
+    #           "read", "read_deb_date", "read_fin_date", 
+    #           "keywords", "cover", "score", "onmyshelf")
+    cols <- names(books)
     values$books_df[input$books_tbl_row_last_clicked, cols] <- edit_values[cols]
     
     update_db()

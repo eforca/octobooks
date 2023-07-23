@@ -2,6 +2,7 @@ tabPanel("Ajouter",
          value = "ajouter",
          fluidPage(
              
+             # Side panel ----
              column(3,
                     id = "side-panel",
                     
@@ -21,9 +22,32 @@ tabPanel("Ajouter",
                             ),
                         ),
                     ),
-                    checkboxGroupButtons("onmyshelf",
-                                         choices = c("Dans ma bibliothèque" = TRUE),
-                                         status = "theme-light"),
+                    splitLayout(
+                        style = "width: 300px; max-width: 100%;",
+                        cellWidths = c("65%", "35%"),
+                        checkboxGroupButtons("onmyshelf",
+                                             choices = c("Dans ma bibliothèque" = TRUE),
+                                             selected = config$default_choices$onmyshelf,
+                                             status = "theme-light"),
+                        tags$div(
+                            style = "padding-top: 7px;",
+                            awesomeCheckbox(
+                                inputId = "signed",
+                                label = "Dédicacé", 
+                                value = FALSE,
+                                status = "info"
+                            ))
+                    ),
+                    # fluidRow(
+                    #     column(6,s
+                    #            checkboxGroupButtons("onmyshelf",
+                    #                                 choices = c("Dans ma bibliothèque" = TRUE),
+                    #                                 status = "theme-light")),
+                    #     column(6,
+                    #            checkboxGroupButtons("signed",
+                    #                                 choices = c("Dédicacé" = TRUE),
+                    #                                 status = "theme-light"))
+                    # ),
                     awesomeRadio("read", "Lu", 
                                  c("Non" = "non",
                                    "Oui" = "oui", 
@@ -34,9 +58,11 @@ tabPanel("Ajouter",
                     tags$div(id = "read_date_div"),
              ),
              
-             # Panel central
+             # Panel central ----
              column(9,
                     id = "add-panel",
+                    
+                    ## Titres, auteurices, image ----
                     fluidRow(
                         column(8,
                                
@@ -47,12 +73,12 @@ tabPanel("Ajouter",
                                
                                # Titre VO
                                hidden(
-                               tags$div(id = "titreVoDiv",
-                                        textInput("titre_vo",
-                                                  "Titre original",
-                                                  placeholder = "",
-                                                  width = "100%")
-                               )),
+                                   tags$div(id = "titreVoDiv",
+                                            textInput("titre_vo",
+                                                      "Titre original",
+                                                      placeholder = "",
+                                                      width = "100%")
+                                   )),
                                
                                # Auteurices
                                tags$div(id = "auteuricesMainDiv",
@@ -79,8 +105,6 @@ tabPanel("Ajouter",
                                                      class = "coloured-btn autandtrad"),
                                         tags$div(id = "traducteuricesSubDiv",
                                                  fluidRow(id = "traducteuricesRow"))),
-                               
-                               tags$div(id = "interpretesMainDiv"),
                                
                                awesomeCheckboxGroup("genders",
                                                     NULL,
@@ -115,7 +139,7 @@ tabPanel("Ajouter",
                         ),
                     ),
                     
-                    # Genre littéraire, langue originale
+                    ## Première ligne ----
                     fluidRow(
                         column(4, 
                                selectInput("genre", "Genre littéraire",
@@ -124,7 +148,7 @@ tabPanel("Ajouter",
                         ),
                         column(4,
                                textInput("pub_date",
-                                         "Date de première parution",
+                                         "Année de première parution",
                                          placeholder = "")
                         ),
                         column(4,
@@ -142,6 +166,7 @@ tabPanel("Ajouter",
                         )
                     ),
                     
+                    ## Deuxième ligne ----
                     fluidRow(
                         column(4,
                                selectInput("format",
@@ -151,17 +176,39 @@ tabPanel("Ajouter",
                         ),
                         column(4,
                                textInput("edition_date",
-                                         "Date de l'édition",
+                                         "Année de l'édition",
                                          placeholder = "")),
                         column(4,
                                selectInput("langue",
                                            "Langue de l'édition",
                                            choices = config$choices$langue,
                                            selected = config$default_choices$langue)
-                        ),
+                        )
                     ),
                     
-                    # Nombre de pages, date de lecture
+                    ## Troisième ligne ----
+                    fluidRow(
+                        column(4,
+                               selectInput("acqui_type",
+                                           "Type d'acquisition",
+                                           choices = config$choices$acqui_type,
+                                           selected = config$default_choices$acqui_type)
+                        ),
+                        column(4,
+                               textInput("acqui_date",
+                                         "Année d'acquisition",
+                                         placeholder = "")
+                        ),
+                        column(4,
+                               selectInput("acqui_state",
+                                           "État d'acquisition",
+                                           choices = config$choices$acqui_state,
+                                           selected = config$default_choices$acqui_state
+                               )
+                        )
+                    ),
+                    
+                    ## Quatrième ligne ----
                     fluidRow(
                         column(4, id = "pages_div",
                                tags$div(
@@ -176,6 +223,7 @@ tabPanel("Ajouter",
                                            choices = config$choices$owner,
                                            selected = config$default_choices$owner)
                         ),
+                        
                         column(4,
                                selectInput("keywords",
                                            "Mots-clés",
@@ -184,18 +232,21 @@ tabPanel("Ajouter",
                         )
                     ),  
                     
-                    # Messages d'erreur et bouton ajouter
+                    ## Messages d'erreur et bouton ajouter ----
                     fluidRow(
                         id = "bottom-row",
-                        column(9,
+                        column(8,
                                div(id = "addMessage")
                         ),
-                        column(3,
-                               actionButton(inputId = "reinit_button", 
-                                            label = "Réinitialiser"),
-                               actionButton(inputId = "add_button", 
-                                            label = "Ajouter",
-                                            class = "coloured-btn")
+                        column(4,
+                               tags$div(
+                                   style = "width: 300px; max-width: 100%;",
+                                   actionButton(inputId = "reinit_button", 
+                                                label = "Réinitialiser"),
+                                   actionButton(inputId = "add_button", 
+                                                label = "Ajouter",
+                                                class = "coloured-btn")   
+                               )
                         ),
                     )
              ),
