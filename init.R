@@ -1,11 +1,11 @@
-### Fonctions usuelles ----
+# Fonctions usuelles ----
 str_isnum <- function(x) {!grepl("\\D", x)}
 fmt_semicol <- function(v) {
     return(gsub("^;|;$", "", 
                 gsub("(;){2,}", replacement = ";", paste(v, collapse = ";"))))
 }
 
-### Constantes ----
+# Constantes ----
 
 this_year <- as.POSIXct(paste0(format(Sys.Date(), "%Y"), 
                                c("-01-01", "-12-31")), 
@@ -28,7 +28,7 @@ code_lu <- c("non" = "Non",
 stat_cats <- c("genre", "langue_vo", "genders", 
                "langue", "format", "owner", "keywords")
 
-### Base ----
+# Base ----
 
 # Vérification de l'existence de la base
 if (!file.exists("data")) dir.create("data")
@@ -46,13 +46,13 @@ if (!file.exists("data/octobooks.csv")) {
                       langue_vo = character(),
                       pays_vo = character(),
                       langue = character(),
+                      acqui_type = character(),
+                      acqui_date = integer(),
+                      acqui_state = character(),
                       format = character(),
                       pages = integer(),
                       duree_h = integer(),
                       duree_min = integer(),
-                      acqui_type = character(),
-                      acqui_date = integer(),
-                      acqui_state = character(),
                       owner = character(),
                       read = character(),
                       read_deb_date = POSIXct(),
@@ -111,7 +111,7 @@ books[, read_fin_date := as.POSIXct(read_fin_date, tz = "GMT")]
 #                                 "pays_vo", "langue", "format", "pages", "duree_h", "duree_min", 
 #                                 "owner", "read", "read_deb_date", "read_fin_date", "keywords", "cover"))
 
-### Config ----
+# Config ----
 
 # Création des fichiers de config si nécessaire
 config_files <- c("selected_cols", "default_choices", "choices", "settings")

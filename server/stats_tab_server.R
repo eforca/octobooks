@@ -134,7 +134,7 @@ fmt_dtplot <- function(d, sel_cat) {
 output$cat_table <- render_gt({
     
     sel_cat <- input$stat_cat
-    dtplot <- fmt_dtplot(values$books_df, sel_cat)
+    dtplot <- fmt_dtplot(copy(values$books_df), sel_cat)
     sel_year <- "Total"
     
     if (sel_cat %in% c("genders", "keywords")) {
@@ -168,7 +168,7 @@ output$cat_table <- render_gt({
 output$cat_plot <- renderPlot({
     
     sel_cat <- input$stat_cat
-    dtplot <- fmt_dtplot(values$books_df, sel_cat)
+    dtplot <- fmt_dtplot(copy(values$books_df), sel_cat)
     
     if (nrow(dtplot)) {
         

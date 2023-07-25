@@ -417,8 +417,10 @@ reset_add <- function() {
     intbtn_count(1)
     
     updateTextInput(session, "isbn", value = "")
-    updateCheckboxGroupButtons(session, "onmyshelf", selected = character(0))
+    updateCheckboxGroupButtons(session, "onmyshelf", selected = values$default_choices$onmyshelf)
+    updateAwesomeCheckbox(session, "signed", value = FALSE)
     updateTextInput(session, "titre", value = "")
+    updateTextInput(session, "titre_vo", value = "")
     updateTextInput(session, "nbpages", value = "")
     updateTextInput(session, "duree_h", value = "")
     updateTextInput(session, "duree_min", value = "")
@@ -429,6 +431,9 @@ reset_add <- function() {
     updateSelectInput(session, "langue_vo", selected = values$default_choices$langue_vo)
     updateSelectInput(session, "pays_vo", selected = "")
     updateSelectInput(session, "langue", selected = values$default_choices$langue)
+    updateSelectInput(session, "acqui_type", selected = values$default_choices$acqui_type)
+    updateTextInput(session, "acqui_date", value = "")
+    updateSelectInput(session, "acqui_state", selected = values$default_choices$acqui_state)
     updateSelectInput(session, "format", selected = values$default_choices$format)
     updateSelectInput(session, "owner", selected = values$default_choices$owner)
     updateAwesomeCheckboxGroup(session, "genders",
