@@ -219,7 +219,7 @@ entry_form <- function(button_id) {
                                div(
                                    id = "edit_imageSubDiv",
                                    img(id = "edit_coverImage",
-                                       src = "covers/dummy_cover.jpg")
+                                       src = "dummy_cover.jpg")
                                ),
                                # imageOutput("edit_coverImage",
                                #             height = "200px"),
@@ -465,13 +465,19 @@ observeEvent(input$edit_button, {
         
         # Image 
         
-        img_path <- grep(book_values$isbn, list.files(path = "www/covers/"), value = T)
-        
-        if (length(img_path)) {
-            edit_coverImg(paste0("www/covers/", img_path))
+        if (book_values$cover) {
+            img_path <- grep(book_values$isbn, list.files(path = "www/covers/"), value = T)
+            # img_path <- grep(book_values$isbn, list.files(user_path("data/covers/")), value = T)
+
+            if (length(img_path)) {
+                edit_coverImg(paste0("www/covers/", img_path))
+            } else {
+                edit_coverImg("www/dummy_cover.jpg")
+            }
         } else {
-            edit_coverImg("www/covers/dummy_cover.jpg")
+            edit_coverImg("www/dummy_cover.jpg")
         }
+        
         
         toggleState("edit_resetupload_button", condition = book_values$cover)
         
@@ -550,7 +556,7 @@ observeEvent(input$edit_read_deb_date, {
 
 ### Image ----
 
-edit_coverImg <- reactiveVal(value = "www/covers/dummy_cover.jpg")
+edit_coverImg <- reactiveVal(value = "www/dummy_cover.jpg")
 
 update_edit_coverImage <- function() {
     shinyjs::runjs(
@@ -575,7 +581,7 @@ observeEvent(input$edit_coverImageInput, {
 observeEvent(input$edit_resetupload_button, {
     
     disable(id = "edit_resetupload_button")
-    edit_coverImg("www/covers/dummy_cover.jpg")
+    edit_coverImg("www/dummy_cover.jpg")
     update_edit_coverImage()
     
     removeUI("#edit_coverImageInputDiv")
@@ -630,18 +636,24 @@ editForm <- reactive({
         edit_nbpages <- as.integer(input$edit_nbpages)
     }
     
-    urlImg <- sprintf("www/covers/cover_%s.%s", input$edit_isbn, 
-                      file_ext(edit_coverImg()))
-    print(urlImg)
-    if (edit_coverImg() != urlImg) {
-        imgfiles <- grep(input$edit_isbn, list.files(path = "www/covers/"), value = T)
+    img_name <- sprintf("cover_%s.%s", input$edit_isbn, file_ext(edit_coverImg()))
+    urlImg <- paste0("www/covers/", img_name)
+    # urlImg <- user_path(sprintf("data/covers/cover_%s.%s", input$edit_isbn, 
+    #                             file_ext(edit_coverImg())))
+    edit_cover <- md5sum("www/dummy_cover.jpg") != md5sum(edit_coverImg())
+    if (!edit_cover) {
+        imgfiles <- grep(input$edit_isbn, list.files(path = user_path("data/covers/")), value = T)
         if (length(imgfiles)) {
-            file.remove(paste0("www/covers/", imgfiles))
+            file.remove(user_path(paste0("data/covers/", imgfiles)))
+        }
+    } else if (edit_cover && edit_coverImg() != urlImg) {
+        imgfiles <- grep(input$edit_isbn, list.files(path = user_path("data/covers/")), value = T)
+        if (length(imgfiles)) {
+            file.remove(user_path(paste0("data/covers/", imgfiles)))
         }
         file.copy(edit_coverImg(), urlImg, overwrite = T)
-        
+        file.copy(edit_coverImg(), user_path(paste0("data/covers/", img_name)), overwrite = T)
     }
-    edit_cover <- md5sum("www/covers/dummy_cover.jpg") != md5sum(urlImg)
     
     editForm <- data.frame(
         isbn = input$edit_isbn,
@@ -706,8 +718,8 @@ deleteData <- reactive({
     selected_ids <- values$books_df[input$books_tbl_rows_selected, isbn]
     values$books_df <- values$books_df[!(isbn %in% selected_ids)]
     
-    file.remove(paste0("www/covers/", 
-                       grep(selected_ids, list.files(path = "www/covers/"), value = T)))
+    file.remove(user_path(paste0("data/covers/", 
+                                 grep(selected_ids, list.files(user_path("data/covers/")), value = T))))
     
 })
 

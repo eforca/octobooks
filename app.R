@@ -10,11 +10,21 @@ invisible(gc())
 options(encoding = "UTF-8", scipen = 999)
 
 # Packages ----
-if (!require("pacman")) install.packages("pacman")
-pacman::p_load(shiny, shinyjs, shinyWidgets, DT, yaml,
-               htmltools, rvest, httr, RSelenium, curl,
-               data.table, stringr, lubridate, tools,
-               ggplot2, gt)
+library(shiny)
+library(shinyjs)
+library(shinyWidgets)
+library(DT)
+library(yaml)
+library(htmltools)
+library(rvest)
+library(httr)
+library(curl)
+library(data.table)
+library(stringr)
+library(lubridate)
+library(tools)
+library(ggplot2)
+library(gt)
 
 theme_set(theme_minimal())
 

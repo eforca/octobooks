@@ -144,7 +144,7 @@ observeEvent(input$read_deb_date, {
 
 # Image de couverture ----
 
-coverImg <- reactiveVal(value = "www/covers/dummy_cover.jpg")
+coverImg <- reactiveVal(value = "www/dummy_cover.jpg")
 
 # Update de l'image de couverture
 update_coverImage <- function() {
@@ -184,9 +184,9 @@ reset_coverInput <- function() {
 
 observeEvent(input$resetupload_button, {
     reset_coverInput()
-    if (coverImg() != "www/covers/dummy_cover.jpg") {
+    if (coverImg() != "www/dummy_cover.jpg") {
         file.remove(coverImg())
-        coverImg("www/covers/dummy_cover.jpg")
+        coverImg("www/dummy_cover.jpg")
         update_coverImage()
     }
 })
@@ -194,7 +194,7 @@ observeEvent(input$resetupload_button, {
 # Accès au bouton de reset de l'image de couverture
 observe({
     toggleState("resetupload_button", 
-                condition = coverImg() != "www/covers/dummy_cover.jpg")
+                condition = coverImg() != "www/dummy_cover.jpg")
 })
 
 
@@ -444,7 +444,7 @@ reset_add <- function() {
     updateSelectInput(session, "keywords", 
                       choices = values$choices$keywords, selected = NULL)
     
-    coverImg("www/covers/dummy_cover.jpg")
+    coverImg("www/dummy_cover.jpg")
     update_coverImage()
     reset_coverInput()
 }
@@ -546,7 +546,7 @@ observeEvent(input$isbnButton, {
     insertUI(selector = "#traducteuricesSubDiv",
              ui = fluidRow(id = "traducteuricesRow"))
     
-    coverImg("www/covers/dummy_cover.jpg")
+    coverImg("www/dummy_cover.jpg")
     reset_coverInput()  
     
     isbn <- gsub("-", "", str_trim(input$isbn))
@@ -605,7 +605,7 @@ observeEvent(input$isbnButton, {
         
         ## Téléchargement de l'image de couverture ----
         
-        if (coverImg() == "www/covers/dummy_cover.jpg") {
+        if (coverImg() == "www/dummy_cover.jpg") {
             
             print("Trying Decitre for cover")
             shinyjs::html(id = "progress-message", "Trying Decitre for cover...")
@@ -720,7 +720,7 @@ observeEvent(input$isbnButton, {
 
 # Mise à jour de la base locale
 update_db <- function() {
-    fwrite(values$books_df, "data/octobooks.csv")
+    fwrite(values$books_df, user_path("data/octobooks.csv"))
 }
 
 # Formatage des informations du livre
@@ -757,11 +757,12 @@ addbooks_df <- reactive({
         nbpages <- input$nbpages
     }
     
-    urlImg <- sprintf("www/covers/cover_%s.%s", input$isbn, file_ext(coverImg()))
-    cover <- coverImg() != "www/covers/dummy_cover.jpg"
+    img_name <- sprintf("cover_%s.%s", input$isbn, file_ext(coverImg()))
+    cover <- coverImg() != "www/dummy_cover.jpg"
     
     if (cover) {
-        file.copy(coverImg(), urlImg, overwrite = T)
+        file.copy(coverImg(), file.path("www/covers", img_name), overwrite = T)
+        file.copy(coverImg(), user_path(file.path("data/covers", img_name)), overwrite = T)
     }
     
     addbooks_df <- data.frame(

@@ -1,3 +1,10 @@
+# Chemins d'accès ----
+user_id <- "perso"
+user_path <- function(path) file.path("users", user_id, path)
+
+if (!file.exists("users")) dir.create("users")
+if (!file.exists(user_path(""))) dir.create(user_path(""))
+
 # Fonctions usuelles ----
 str_isnum <- function(x) {!grepl("\\D", x)}
 fmt_semicol <- function(v) {
@@ -31,8 +38,8 @@ stat_cats <- c("genre", "langue_vo", "genders",
 # Base ----
 
 # Vérification de l'existence de la base
-if (!file.exists("data")) dir.create("data")
-if (!file.exists("data/octobooks.csv")) {
+if (!file.exists(user_path("data"))) dir.create(user_path("data"))
+if (!file.exists(user_path("data/octobooks.csv"))) {
     fwrite(data.table(isbn = character(),
                       title = character(),
                       title_vo = character(),
@@ -62,36 +69,27 @@ if (!file.exists("data/octobooks.csv")) {
                       score = character(),
                       onmyshelf = logical(), 
                       signed = logical()),
-           "data/octobooks.csv")
+           user_path("data/octobooks.csv"))
 }
 
 # Sauvegarde de la base si nécessaire
-if (!file.exists("data/backups")) dir.create("data/backups")
-lastsave <- paste0("data/backups/", sort(list.files("data/backups/"), decreasing = T)[1])
-if (lastsave == "data/backups/NA" || md5sum("data/octobooks.csv") != md5sum(lastsave)) {
+if (!file.exists(user_path("data/backups"))) dir.create(user_path("data/backups"))
+lastsave <- paste0(user_path("data/backups/"), 
+                   sort(list.files(user_path("data/backups")), decreasing = TRUE)[1])
+if (lastsave == user_path("data/backups/NA") || 
+    md5sum(user_path("data/octobooks.csv")) != md5sum(lastsave)) {
     cat("New backup")
-    file.copy(from = "data/octobooks.csv",
-              to = sprintf("data/backups/octobooks_%i.csv", as.integer(Sys.time())))
+    file.copy(from = user_path("data/octobooks.csv"), 
+              to = user_path(sprintf("data/backups/octobooks_%i.csv", as.integer(Sys.time()))))
 }
+
 
 # Pour retrouver la date et l'heure de création de la sauvegarde :
 # as.POSIXct(n, origin = "1970-01-01")
 
-
-# Suppression des fichiers images temporaires si nécessaires
-if (length(grep("temp_cover", list.files(path = "www/covers/")))) {
-    file.remove(paste0("www/covers/", 
-                       grep("temp_cover", list.files(path = "www/covers/"), value = T)))
-}
-
-# Backup des images de couverture
-if (!file.exists("data/covers")) dir.create("data/covers")
-sapply(setdiff(list.files("www/covers/"), list.files("data/covers/")),
-       function(f) file.copy(sprintf("www/covers/%s", f), sprintf("data/covers/%s", f))) %>% 
-    invisible
-
 # Importation de la base
-books <- fread("data/octobooks.csv", integer64 = "character",
+books <- fread(user_path("data/octobooks.csv"), 
+               integer64 = "character",
                colClasses = list(character=c("title", "title_vo", 
                                              "authors", "translators", "interpreters",
                                              "genders", "genre", "langue_vo", 
@@ -106,6 +104,33 @@ books[, read_deb_date := as.POSIXct(read_deb_date, tz = "GMT")]
 books[, read_fin_date := as.POSIXct(read_fin_date, tz = "GMT")]
 
 
+# Création du dossier de couvertures si nécessaire
+if (!file.exists(user_path("data/covers"))) dir.create(user_path("data/covers"))
+
+# Suppression des fichiers images temporaires si nécessaires
+if (length(list.files("www/covers"))) {
+    file.remove(list.files("www/covers", full.names = TRUE))
+}
+
+# Ajout des couvertures de l'utilisateurs dans les ressources
+file.copy(list.files(user_path("data/covers"), full.names = TRUE), "www/covers")
+
+
+# # Suppression des fichiers images temporaires si nécessaires
+# if (length(grep("temp_cover", list.files(path = "www/covers/")))) {
+#     file.remove(paste0("www/covers/", 
+#                        grep("temp_cover", list.files(path = "www/covers/"), value = T)))
+# }
+# 
+# # Backup des images de couverture
+# if (!file.exists("data/covers")) dir.create("data/covers")
+# sapply(setdiff(list.files("www/covers/"), list.files("data/covers/")),
+#        function(f) file.copy(sprintf("www/covers/%s", f), sprintf("data/covers/%s", f))) %>% 
+#     invisible
+
+
+
+
 # setcolorder(books, neworder = c("isbn", "title", "authors", "translators", "interpreters",
 #                                 "genders", "genre", "pub_date", "edition_date", "langue_vo", 
 #                                 "pays_vo", "langue", "format", "pages", "duree_h", "duree_min", 
@@ -113,17 +138,17 @@ books[, read_fin_date := as.POSIXct(read_fin_date, tz = "GMT")]
 
 # Config ----
 
-# Création des fichiers de config si nécessaire
+# Import des fichiers de config (création si nécessaire)
 config_files <- c("selected_cols", "default_choices", "choices", "settings")
+if (!file.exists(user_path("config"))) dir.create(user_path("config"))
 config <- sapply(config_files, function(f) {
     fpath <- sprintf("config/%s.yml", f)
-    if (file.exists(fpath)) {
-        read_yaml(fpath)
-    } else {
-        file.copy(sprintf("config/init/%s.yml", f), fpath)
-        read_yaml(fpath)
+    if (!file.exists(user_path(fpath))) {
+        file.copy(sprintf("config/%s.yml", f), user_path(fpath))
     }
+    read_yaml(user_path(fpath))
 })
+
 
 # Noms des colonnes du tableau de données
 labcols <- c(isbn = config$settings$isbnCase, 

@@ -120,7 +120,7 @@ tabPanel("Ajouter",
                                    div(
                                        id = "imageSubDiv",
                                        img(id = "coverImage",
-                                           src = "covers/dummy_cover.jpg")
+                                           src = "dummy_cover.jpg")
                                    ),
                                    splitLayout(
                                        class = "cover-layout",

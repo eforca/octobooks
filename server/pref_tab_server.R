@@ -30,7 +30,7 @@ observeEvent(input$change_defcols_button, {
                                    selected = newselcols)
     }
     
-    write_yaml(values$selected_cols, "config/selected_cols.yml")
+    write_yaml(values$selected_cols, user_path("config/selected_cols.yml"))
     shinyjs::html("newdefcolsMessage", HTML("<p class='success'>Les colonnes sélectionnées par défaut ont bien été modifiées !</p>"))
 })
 
@@ -63,7 +63,7 @@ output$defvalue <- renderUI({
 
 observeEvent(input$change_default_button, {
     values$default_choices[[input$coltochange]] <- input$newdefvalue
-    write_yaml(values$default_choices, "config/default_choices.yml")
+    write_yaml(values$default_choices, user_path("config/default_choices.yml"))
     shinyjs::html("newdefvalueMessage", HTML("<p class='success'>La valeur par défaut a bien été modifiée !</p>"))
 })
 
@@ -128,7 +128,7 @@ observeEvent(input$add_choice_button, {
 observeEvent(input$confirm_newchoice, {
     values$choices[[newcol()]] <- sort(c(values$choices[[newcol()]], newval()))
     
-    write_yaml(values$choices, "config/choices.yml")
+    write_yaml(values$choices, user_path("config/choices.yml"))
     
     newval(NULL)
     updateTextInput(session, "newchoice", value = "")
@@ -175,5 +175,5 @@ observeEvent(input$set_isbnCase, {
 ## Mise à jour des réglages ----
 observeEvent(values$settings, {
     print("Updating settings file")
-    write_yaml(values$settings, "config/settings.yml")
+    write_yaml(values$settings, user_path("config/settings.yml"))
 }, ignoreInit = TRUE)
