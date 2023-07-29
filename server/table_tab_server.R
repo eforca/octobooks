@@ -13,7 +13,7 @@ output$selcols <- renderUI({
                                     label = NULL,
                                     choices = setNames(names(labcols)[li:hi], 
                                                        labcols[li:hi]),
-                                    selected = config$selected_cols,
+                                    selected = user_config$selected_cols,
                                     inline = F, status = "info")
         )
     })
@@ -21,7 +21,7 @@ output$selcols <- renderUI({
 
 
 ## Formatage du tableau ----
-fmt_tbl <- function(book_table, selcols = config$selected_cols) {
+fmt_tbl <- function(book_table, selcols = user_config$selected_cols) {
     
     book_table$read <- code_lu[book_table$read]
     
@@ -179,7 +179,7 @@ entry_form <- function(button_id) {
             fluidPage(
                 fluidRow(
                     column(4,
-                           disabled(textInput("edit_isbn", config$settings$isbnCase)),
+                           disabled(textInput("edit_isbn", user_config$settings$isbnCase)),
                     ),
                     column(4,
                            checkboxGroupButtons("edit_onmyshelf",

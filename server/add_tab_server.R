@@ -2,60 +2,57 @@ shinyjs::runjs("$('#pub_date, #edition_date, #acqui_date').attr('maxlength', 4);
 
 # Listes dynamiques ----
 
-observe({
+observeEvent(values$default_choices$onmyshelf, {
     updateCheckboxGroupButtons(session,
                                "onmyshelf",
                                selected = values$default_choices$onmyshelf)
-}) 
-observe({
+}, ignoreInit = TRUE) 
+observeEvent(values$default_choices$read, {
     updateAwesomeRadio(session,
                        "read",
                        selected = values$default_choices$read)
-}) 
-observe({
+}, ignoreInit = TRUE) 
+observeEvent(values$default_choices$genre, {
     updateSelectInput(session,
                       "genre",
                       choices = values$choices$genre,
                       selected = values$default_choices$genre)
-}) 
-observe({    
+}, ignoreInit = TRUE) 
+observeEvent(values$default_choices$langue_vo, {    
     updateSelectInput(session,
                       "langue_vo",
                       choices = values$choices$langue_vo,
                       selected = values$default_choices$langue_vo)
-}) 
-observe({
+}, ignoreInit = TRUE) 
+observeEvent(values$default_choices$pays_vo, {
     updateSelectInput(session, 
                       "pays_vo",
                       choices = values$choices$pays_vo,
                       selected = "")
-}) 
-observe({
+}, ignoreInit = TRUE) 
+observeEvent(values$default_choices$format, {
     updateSelectInput(session,
                       "format",
                       choices = values$choices$format,
                       selected = values$default_choices$format)
-}) 
-
-observe({   
+}, ignoreInit = TRUE) 
+observeEvent(values$default_choices$langue, {   
     updateSelectInput(session,
                       "langue",
                       choices = values$choices$langue,
                       selected = values$default_choices$langue)
-}) 
-
-observe({ 
+}, ignoreInit = TRUE) 
+observeEvent(values$default_choices$owner, { 
     updateSelectInput(session,
                       "owner",
                       choices = values$choices$owner,
                       selected = values$default_choices$owner)
-}) 
-
-observe({  
+}, ignoreInit = TRUE) 
+observeEvent(values$default_choices$keywords, {  
     updateSelectInput(session,
                       "keywords",
                       choices = values$choices$keywords)
-})
+}, ignoreInit = TRUE)
 
 
 # Date de lecture ----
@@ -465,9 +462,7 @@ observeEvent(input$tabs, {
 # Requête ISBN ----
 
 update_add <- function(res_data) {
-    
-    print(res_data)
-    
+
     updateTextInput(inputId = "titre", 
                     value = res_data$title)
     
@@ -828,8 +823,6 @@ observeEvent(input$add_button, {
         shinyjs::html("addMessage", HTML(sprintf('<p class="error">%s</p>', "ISBN déjà présent dans la base")))
     } else {
         
-        print(names(addbooks_df()))
-        print(names(values$books_df))
         values$books_df <- rbindlist(list(values$books_df, addbooks_df()))
         update_db()
         

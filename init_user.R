@@ -1,39 +1,9 @@
 # Chemins d'accès ----
-user_id <- "perso"
-user_path <- function(path) file.path("users", user_id, path)
+user_path <<- function(path) file.path("users", active_user$username, path)
 
 if (!file.exists("users")) dir.create("users")
 if (!file.exists(user_path(""))) dir.create(user_path(""))
 
-# Fonctions usuelles ----
-str_isnum <- function(x) {!grepl("\\D", x)}
-fmt_semicol <- function(v) {
-    return(gsub("^;|;$", "", 
-                gsub("(;){2,}", replacement = ";", paste(v, collapse = ";"))))
-}
-
-# Constantes ----
-
-this_year <- as.POSIXct(paste0(format(Sys.Date(), "%Y"), 
-                               c("-01-01", "-12-31")), 
-                        tz = "UTC")
-
-
-code_genders <- c("F" = "Femme(s)",
-                  "H" = "Homme(s)",
-                  "N" = "Non-binaire(s)",
-                  "I" = "Je ne sais pas")
-
-code_langue <- c("fre" = "Français",
-                 "eng" = "Anglais",
-                 "spa" = "Espagnol")
-
-code_lu <- c("non" = "Non", 
-             "oui" = "Oui", 
-             "dnf" = "Pas fini")
-
-stat_cats <- c("genre", "langue_vo", "genders", 
-               "langue", "format", "owner", "keywords")
 
 # Base ----
 
@@ -107,12 +77,8 @@ books[, read_fin_date := as.POSIXct(read_fin_date, tz = "GMT")]
 # Création du dossier de couvertures si nécessaire
 if (!file.exists(user_path("data/covers"))) dir.create(user_path("data/covers"))
 
-# Suppression des fichiers images temporaires si nécessaires
-if (length(list.files("www/covers"))) {
-    file.remove(list.files("www/covers", full.names = TRUE))
-}
 
-# Ajout des couvertures de l'utilisateurs dans les ressources
+# Ajout des couvertures de l'utilisateur dans les ressources
 file.copy(list.files(user_path("data/covers"), full.names = TRUE), "www/covers")
 
 
@@ -141,7 +107,7 @@ file.copy(list.files(user_path("data/covers"), full.names = TRUE), "www/covers")
 # Import des fichiers de config (création si nécessaire)
 config_files <- c("selected_cols", "default_choices", "choices", "settings")
 if (!file.exists(user_path("config"))) dir.create(user_path("config"))
-config <- sapply(config_files, function(f) {
+user_config <<- sapply(config_files, function(f) {
     fpath <- sprintf("config/%s.yml", f)
     if (!file.exists(user_path(fpath))) {
         file.copy(sprintf("config/%s.yml", f), user_path(fpath))
@@ -149,35 +115,21 @@ config <- sapply(config_files, function(f) {
     read_yaml(user_path(fpath))
 })
 
+# Reactive values ----
 
-# Noms des colonnes du tableau de données
-labcols <- c(isbn = config$settings$isbnCase, 
-             title = "Titre", 
-             title_vo = "Titre original",
-             authors = "Auteurices",
-             translators = "Traducteurices",
-             interpreters = "Interprètes",
-             genders = "Genres",
-             genre = "Genre littéraire",
-             pub_date = "Parution",
-             edition_date = "Édition",
-             langue_vo = "Langue VO",
-             langue = "Langue",
-             acqui_type = "Type d'acquisition",
-             acqui_date = "Date d'acquisition",
-             acqui_state = "État d'acquisition",       
-             format = "Format",
-             pages = "Pages",
-             duree = "Durée",
-             owner = "Propriétaire",
-             read = "Lu",
-             onmyshelf = "Dans ma bibli",
-             signed = "Dédicacé",
-             read_deb_date = "Date début", 
-             read_fin_date = "Date fin", 
-             score = "Note",
-             keywords = "Mots-clés",
-             cover = "Couverture")
+# Base, choix proposés et choix par défaut
+values$books_df <- books
+values$selected_cols <- user_config$selected_cols
+values$choices <- user_config$choices
+values$default_choices <- user_config$default_choices
+values$settings <- user_config$settings
 
-# Nombre de variables par colonne pour le choix des variables du tableau
-nb_per_col <- ceiling(length(labcols)/6)
+updateColorPickr(session, "set_themeColour", 
+                 value = values$settings$themeColour)
+
+for(i in 1:6) {
+    updateAwesomeCheckboxGroup(session,
+                               paste0("selcols", i),
+                               selected = values$selected_cols)
+}
+

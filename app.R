@@ -26,11 +26,16 @@ library(tools)
 library(ggplot2)
 library(gt)
 
+library(RPostgres)
+library(DBI)
+library(digest)
+
 theme_set(theme_minimal())
 
 
 # Initialisation ----
-source("init.R", local = T)
+source("fonctions.R", local = T)
+source("init_app.R", local = T)
 
 
 # UI ----
@@ -68,13 +73,20 @@ server <- function(input, output, session) {
     
     shinyjs::runjs("localStorage.clear();")
     
+    active_user <- reactiveValues(username = NULL)
+    
     # Base, choix proposés et choix par défaut
-    values <- reactiveValues(books_df = books, 
+    values <- reactiveValues(books_df = NULL,
                              selected_cols = config$selected_cols,
                              choices = config$choices,
                              default_choices = config$default_choices,
                              settings = config$settings)
     
+    ## Connexion et inscription ----
+    source(file = "server/signin_server.R", local = T)$value
+    
+    ## Inscription ----
+    source(file = "server/signup_server.R", local = T)$value
     
     ## Ajouter ----
     source(file = "server/add_tab_server.R", local = T)$value

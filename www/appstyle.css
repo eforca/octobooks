@@ -130,13 +130,16 @@ h2 {
 }*/
 
 .error {
-  color: red;
+  color: var(--theme_colour);
 }
 
 .success {
   color: green;
 }
 
+.modal-sm {
+    text-align: center;
+}
 
 #side-panel {
   margin-top: 15px;

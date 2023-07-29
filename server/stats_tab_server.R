@@ -144,9 +144,6 @@ output$cat_table <- render_gt({
                         dtplot[year == sel_year, .("Total", sum(N), "100%")], use.names = FALSE)
     }
     
-    
-    print(dtplot)
-    
     dtplot[, .(sel_cat, N, p)] %>%
         gt() %>%
         tab_options(table.font.size = px(14),

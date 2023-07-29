@@ -22,32 +22,38 @@ tabPanel("Ajouter",
                             ),
                         ),
                     ),
-                    splitLayout(
-                        style = "width: 300px; max-width: 100%;",
-                        cellWidths = c("65%", "35%"),
-                        checkboxGroupButtons("onmyshelf",
-                                             choices = c("Dans ma bibliothèque" = TRUE),
-                                             selected = config$default_choices$onmyshelf,
-                                             status = "theme-light"),
-                        tags$div(
-                            style = "padding-top: 7px;",
-                            awesomeCheckbox(
-                                inputId = "signed",
-                                label = "Dédicacé", 
-                                value = FALSE,
-                                status = "info"
-                            ))
-                    ),
-                    # fluidRow(
-                    #     column(6,s
-                    #            checkboxGroupButtons("onmyshelf",
-                    #                                 choices = c("Dans ma bibliothèque" = TRUE),
-                    #                                 status = "theme-light")),
-                    #     column(6,
-                    #            checkboxGroupButtons("signed",
-                    #                                 choices = c("Dédicacé" = TRUE),
-                    #                                 status = "theme-light"))
+                    # splitLayout(
+                    #     style = "width: 300px; max-width: 100%;",
+                    #     cellWidths = c("65%", "35%"),
+                    #     checkboxGroupButtons("onmyshelf",
+                    #                          choices = c("Dans ma bibliothèque" = TRUE),
+                    #                          selected = config$default_choices$onmyshelf,
+                    #                          status = "theme-light"),
+                    #     tags$div(
+                    #         style = "padding-top: 7px;",
+                    #         awesomeCheckbox(
+                    #             inputId = "signed",
+                    #             label = "Dédicacé", 
+                    #             value = FALSE,
+                    #             status = "info"
+                    #         ))
                     # ),
+                    fluidRow(
+                        column(7,
+                               checkboxGroupButtons("onmyshelf",
+                                                    choices = c("Dans ma bibliothèque" = TRUE),
+                                                    status = "theme-light")),
+                        column(5,
+                            tags$div(
+                                style = "padding-top: 7px;",
+                                awesomeCheckbox(
+                                    inputId = "signed",
+                                    label = "Dédicacé",
+                                    value = FALSE,
+                                    status = "info"
+                                ))   
+                        )
+                    ),
                     awesomeRadio("read", "Lu", 
                                  c("Non" = "non",
                                    "Oui" = "oui", 

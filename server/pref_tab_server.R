@@ -12,7 +12,7 @@ output$select_newdefcols <- renderUI({
                                         label = NULL,
                                         choices = setNames(names(labcols)[li:hi], 
                                                            labcols[li:hi]),
-                                        selected = config$selected_cols,
+                                        selected = user_config$selected_cols,
                                         inline = F, status = "info")
             )
         })
@@ -87,7 +87,8 @@ output$select_coltoaddto <- renderUI({
                 selected = newcol())
 })
 
-observeEvent(input$coltoaddto, {
+observe({
+    req(input$coltoaddto)
     newcol(input$coltoaddto)
     shinyjs::html("availChoices",
                   HTML(sprintf("- %s<br>", grep("[a-zA-Z0-9]+", values$choices[[newcol()]], value = T)))
@@ -174,6 +175,11 @@ observeEvent(input$set_isbnCase, {
 
 ## Mise à jour des réglages ----
 observeEvent(values$settings, {
-    print("Updating settings file")
-    write_yaml(values$settings, user_path("config/settings.yml"))
+    if (!isTRUE(all.equal(user_config$settings, values$settings))) {
+        print("Updating settings file")
+        write_yaml(values$settings, user_path("config/settings.yml"))   
+    }
 }, ignoreInit = TRUE)
+
+
+
