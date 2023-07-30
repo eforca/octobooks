@@ -130,11 +130,11 @@ h2 {
 }*/
 
 .error {
-  color: var(--theme_colour);
+  color: #E44853;
 }
 
 .success {
-  color: green;
+  color: var(--theme_colour);
 }
 
 .modal-sm {

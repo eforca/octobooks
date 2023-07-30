@@ -12,43 +12,43 @@ observeEvent(values$default_choices$read, {
                        "read",
                        selected = values$default_choices$read)
 }, ignoreInit = TRUE) 
-observeEvent(values$default_choices$genre, {
+observe({
     updateSelectInput(session,
                       "genre",
                       choices = values$choices$genre,
                       selected = values$default_choices$genre)
-}, ignoreInit = TRUE) 
-observeEvent(values$default_choices$langue_vo, {    
+}) 
+observe({    
     updateSelectInput(session,
                       "langue_vo",
                       choices = values$choices$langue_vo,
                       selected = values$default_choices$langue_vo)
-}, ignoreInit = TRUE) 
-observeEvent(values$default_choices$pays_vo, {
+}) 
+observeEvent(values$choices$pays_vo, {
     updateSelectInput(session, 
                       "pays_vo",
                       choices = values$choices$pays_vo,
                       selected = "")
 }, ignoreInit = TRUE) 
-observeEvent(values$default_choices$format, {
+observe({
     updateSelectInput(session,
                       "format",
                       choices = values$choices$format,
                       selected = values$default_choices$format)
-}, ignoreInit = TRUE) 
-observeEvent(values$default_choices$langue, {   
+}) 
+observe({   
     updateSelectInput(session,
                       "langue",
                       choices = values$choices$langue,
                       selected = values$default_choices$langue)
-}, ignoreInit = TRUE) 
-observeEvent(values$default_choices$owner, { 
+}) 
+observe({ 
     updateSelectInput(session,
                       "owner",
                       choices = values$choices$owner,
                       selected = values$default_choices$owner)
-}, ignoreInit = TRUE) 
-observeEvent(values$default_choices$keywords, {  
+}) 
+observeEvent(values$choices$keywords, {  
     updateSelectInput(session,
                       "keywords",
                       choices = values$choices$keywords)
