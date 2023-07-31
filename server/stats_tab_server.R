@@ -133,6 +133,8 @@ fmt_dtplot <- function(d, sel_cat) {
 ## Tableau ----
 output$cat_table <- render_gt({
     
+    if(!nrow(values$books_df)) return()
+    
     sel_cat <- input$stat_cat
     dtplot <- fmt_dtplot(copy(values$books_df), sel_cat)
     sel_year <- "Total"

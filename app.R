@@ -13,7 +13,7 @@ options(encoding = "UTF-8", scipen = 999)
 library(shiny)
 library(shinyjs)
 library(shinyWidgets)
-library(shinybrowser)
+library(waiter)
 library(DT)
 library(yaml)
 library(htmltools)
@@ -42,6 +42,10 @@ source("init_app.R", local = T)
 # UI ----
 ui <- fluidPage(
     useShinyjs(),
+    autoWaiter(id = c("plot_count", "cat_plot"),
+               color = "white",
+               html = spin_loaders(4, color = "var(--theme_colour)")),
+    
     tags$script(src = "appscript.js"),
     tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "appstyle.css")),
     tags$head(tags$style(HTML(sprintf(":root { --theme_colour: %s; }", config$settings$themeColour)))),
