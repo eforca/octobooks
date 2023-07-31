@@ -732,8 +732,10 @@ deleteData <- reactive({
     selected_ids <- values$books_df[input$books_tbl_rows_selected, isbn]
     values$books_df <- values$books_df[!(isbn %in% selected_ids)]
     
-    file.remove(user_path(paste0("data/covers/", 
-                                 grep(selected_ids, list.files(user_path("data/covers/")), value = T))))
+    imgfiles <- grep(selected_ids, list.files(user_path("data/covers/")), value = T)
+    if (length(imgfiles)) {
+        file.remove(user_path(paste0("data/covers/", imgfiles)))
+    }
     
 })
 
