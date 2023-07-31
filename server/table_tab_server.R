@@ -77,6 +77,7 @@ output$books_tbl <- DT::renderDataTable(expr = {
             extensions = c("SearchBuilder", "Buttons"),
             callback = JS("$.fn.dataTable.ext.errMode = 'alert';"),
             options = list(
+                scrollX = TRUE,
                 stateSave = TRUE,
                 # pageLength = config$settings$pageLength,
                 dom = paste0("<'row'<'col-sm-12'Q>>",
@@ -85,6 +86,7 @@ output$books_tbl <- DT::renderDataTable(expr = {
                              "<'row'<'col-sm-12'i>>",
                              "<'row'<'col-sm-12'p>>"),
                 language = list(url = "fr-FR.json"),
+                search = list(caseInsensitive = TRUE),
                 searchBuilder = list(
                     greyscale = TRUE
                 ),
@@ -115,6 +117,7 @@ output$books_tbl <- DT::renderDataTable(expr = {
             extensions = c("SearchBuilder", "Buttons"),
             callback = JS("$.fn.dataTable.ext.errMode = 'alert';"),
             options = list(
+                scrollX = TRUE,
                 stateSave = TRUE,
                 order = isolate(input$books_tbl_state$order),
                 # paging = TRUE,
@@ -126,6 +129,7 @@ output$books_tbl <- DT::renderDataTable(expr = {
                              "<'row'<'col-sm-12'i>>",
                              "<'row'<'col-sm-12'p>>"),
                 language = list(url = "fr-FR.json"),
+                search = list(caseInsensitive = TRUE),
                 searchBuilder = list(
                     greyscale = TRUE,
                     preDefined = isolate(input$books_tbl_state$searchBuilder)
@@ -165,6 +169,16 @@ output$books_tbl <- DT::renderDataTable(expr = {
 }, server = FALSE)
 
 proxy <- dataTableProxy('books_tbl')
+
+## Téléchargement du tableau ----
+output$download_button <- downloadHandler(
+    filename = function() {
+        paste0("octobooks_", Sys.Date(), ".csv")
+    },
+    content = function(file) {
+        fwrite(values$books_df, file)
+    }
+)
 
 
 # Modification de la base ----

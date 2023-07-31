@@ -7,7 +7,10 @@ tabPanel("Table",
          ),
          tags$div(id = "table_div",
                   fluidRow(
-                      DT::DTOutput("books_tbl")
+                      DT::DTOutput("books_tbl"),
+                      downloadButton("download_button",
+                                     "Télécharger (.csv)",
+                                     style = "color: black !important;")
                   )
          )
 )
