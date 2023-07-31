@@ -8,6 +8,7 @@ signupModal <- function() {
         textInput("signup_user", "Identifiant"),
         passwordInput("signup_password", "Mot de passe"),
         passwordInput("signup_verify_password", "Vérification du mot de passe"),
+        passwordInput("signup_secret_key", "Clé secrète"),
         actionButton("signup_button", "Confirmer l'inscription", class = "coloured-btn",
                      width = "100%", style = "margin-top: 15px;"),
         footer = list(
@@ -27,7 +28,8 @@ observeEvent(input$signup_button, {
     
     req(input$signup_user,
         input$signup_password,
-        input$signup_verify_password)
+        input$signup_verify_password,
+        input$signup_secret_key)
     
     # Sign up validation -----
     formatted_log(user = input$signup_user, content = "sign up validation")
@@ -35,7 +37,8 @@ observeEvent(input$signup_button, {
     validation_result <- all(
         grepl(pattern = "^[A-z0-9]{4,20}$", input$signup_user),
         grepl(pattern = "^[A-z0-9]{6,50}$", input$signup_password),
-        input$signup_password == input$signup_verify_password
+        input$signup_password == input$signup_verify_password,
+        input$signup_secret_key == Sys.getenv(x = "SECRET_KEY")
     )
     
     
@@ -58,16 +61,18 @@ observeEvent(input$signup_button, {
             value = ""
         )
         
-        generic_modal(content = list(        
-            "Quelque chose n'a pas fonctionné.",
-            br(),
-            "Veillez à respecter les formats suivants :", 
-            br(), br(),
-            tags$p("Identifiant de 4 à 20 lettres ou chiffres."),
-            tags$p("Mot de passe de 6 à 50 lettres ou chiffres.")
-        ))
-        
-        
+        if (input$signup_secret_key != Sys.getenv(x = "SECRET_KEY")) {
+            generic_modal(content = "La clé secrète est incorrecte")
+        } else {
+            generic_modal(content = list(        
+                "Quelque chose n'a pas fonctionné.",
+                br(),
+                "Veillez à respecter les formats suivants :", 
+                br(), br(),
+                tags$p("Identifiant de 4 à 20 lettres ou chiffres."),
+                tags$p("Mot de passe de 6 à 50 lettres ou chiffres.")
+            ))   
+        }
     }
     
     req(validation_result)
