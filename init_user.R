@@ -58,20 +58,17 @@ if (lastsave == user_path("data/backups/NA") ||
 # as.POSIXct(n, origin = "1970-01-01")
 
 # Importation de la base
-books <- fread(user_path("data/octobooks.csv"), 
-               integer64 = "character",
-               colClasses = list(character=c("title", "title_vo", 
-                                             "authors", "translators", "interpreters",
-                                             "genders", "genre", "langue_vo", 
-                                             "pays_vo", "langue", "format",
-                                             "acqui_type", "acqui_state",
-                                             "owner", "read", "keywords", "score"),
-                                 integer=c("pub_date", "edition_date", "acqui_date",
-                                           "pages", "duree_h", "duree_min"),
-                                 # POSIXct=c("read_deb_date", "read_fin_date"),
-                                 logical=c("cover", "onmyshelf", "signed")))
+books <- read.csv(user_path("data/octobooks.csv"),
+                  na.strings = c("NA", ""),
+                  colClasses = c(setNames(rep("character", length(char_cols)), char_cols),
+                                 setNames(rep("character", length(date_cols)), date_cols),
+                                 setNames(rep("integer", length(int_cols)), int_cols),
+                                 setNames(rep("logical", length(log_cols)), log_cols))) %>% data.table 
+
 books[, read_deb_date := as.POSIXct(read_deb_date, tz = "GMT")]
 books[, read_fin_date := as.POSIXct(read_fin_date, tz = "GMT")]
+
+
 
 
 # Création du dossier de couvertures si nécessaire

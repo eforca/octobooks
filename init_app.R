@@ -46,6 +46,15 @@ config <- sapply(config_files, function(f) {
 })
 
 
+# Types des variable pour import
+char_cols <- c("isbn", "title", "title_vo", "authors", "translators", "interpreters",
+               "genders", "genre", "langue_vo", "pays_vo", "langue", "format",
+               "acqui_type", "acqui_state", "owner", "read", "keywords", "score")
+date_cols <- c("pub_date", "edition_date", "acqui_date")
+int_cols <- c("pages", "duree_h", "duree_min")
+log_cols <- c("cover", "onmyshelf", "signed")
+
+
 # Noms des colonnes du tableau de données
 labcols <- c(isbn = config$settings$isbnCase, 
              title = "Titre", 
