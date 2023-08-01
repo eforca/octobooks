@@ -48,7 +48,7 @@ lastsave <- paste0(user_path("data/backups/"),
                    sort(list.files(user_path("data/backups")), decreasing = TRUE)[1])
 if (lastsave == user_path("data/backups/NA") || 
     md5sum(user_path("data/octobooks.csv")) != md5sum(lastsave)) {
-    cat("New backup")
+    cat("New backup\n")
     file.copy(from = user_path("data/octobooks.csv"), 
               to = user_path(sprintf("data/backups/octobooks_%i.csv", as.integer(Sys.time()))))
 }

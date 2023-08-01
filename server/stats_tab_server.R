@@ -26,6 +26,8 @@ observeEvent(values$books_df, {
 
 output$plot_count_tot <- renderPlot({
     d <- copy(values$books_df)
+    if (!nrow(d)) return()
+    
     df <- d[, .N, keyby = .(onmyshelf, read)
     ][, onmyshelf := factor(onmyshelf, 
                             levels = c(TRUE, FALSE),
@@ -72,6 +74,8 @@ output$plot_count_tot <- renderPlot({
 
 output$plot_count_year <- renderPlot({
     d <- copy(values$books_df)
+    if (!nrow(d)) return()
+    
     d[, `:=`(year = fcase(read != "oui", "Non lu",
                           is.na(read_fin_date), "Non daté",
                           rep_len(TRUE, nrow(d)), format(read_fin_date, "%Y")),
