@@ -28,7 +28,7 @@ code_lu <- c("non" = "Non",
 stat_cats <- c("genre", "langue_vo", "genders", 
                "langue", "format", "owner", "keywords")
 
-
+pal_cats <- c('#fbb4ae','#b3cde3','#ccebc5','#decbe4','#fed9a6','#ffffcc','#e5d8bd','#fddaec','#f2f2f2')
 
 
 # Suppression des fichiers images temporaires si nécessaires

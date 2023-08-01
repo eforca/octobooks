@@ -25,6 +25,8 @@ library(stringr)
 library(lubridate)
 library(tools)
 library(ggplot2)
+library(ggpattern)
+library(ggrepel)
 library(gt)
 
 library(RPostgres)
@@ -38,11 +40,10 @@ theme_set(theme_minimal())
 source("fonctions.R", local = T)
 source("init_app.R", local = T)
 
-
 # UI ----
 ui <- fluidPage(
     useShinyjs(),
-    autoWaiter(id = c("plot_count", "cat_plot"),
+    autoWaiter(id = c("plot_count_tot", "plot_count_year", "cat_plot"),
                color = "white",
                html = spin_loaders(4, color = "var(--theme_colour)")),
     
