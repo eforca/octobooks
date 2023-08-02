@@ -406,6 +406,7 @@ observeEvent(input$edit_button, {
     
     if (length(input$books_tbl_rows_selected) == 1) {
         
+        req(values$books_df)
         entry_form("submit_edit")
         
         book_values <- values$books_df[input$books_tbl_rows_selected,]
@@ -717,7 +718,7 @@ observeEvent(input$submit_edit, {
     #           "format",  "pages", "duree_h", "duree_min", "owner", 
     #           "read", "read_deb_date", "read_fin_date", 
     #           "keywords", "cover", "score", "onmyshelf")
-    cols <- names(books)
+    cols <- names(values$books_df)
     values$books_df[input$books_tbl_row_last_clicked, cols] <- edit_values[cols]
     
     update_db()

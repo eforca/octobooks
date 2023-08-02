@@ -43,7 +43,8 @@ source("init_app.R", local = T)
 # UI ----
 ui <- fluidPage(
     useShinyjs(),
-    autoWaiter(id = c("plot_count_tot", "plot_count_year", "cat_plot"),
+    autoWaiter(id = c("books_tbl", "cat_table",
+                      "plot_count_tot", "plot_count_year", "cat_plot"),
                color = "white",
                html = spin_loaders(4, color = "var(--theme_colour)")),
     
