@@ -18,9 +18,6 @@ owner:
 - ''
 - Autre
 - Bibliothèque
-- Blanche
-- Blanche et Eliot
-- Eliot
 langue:
 - ''
 - Anglais
@@ -44,6 +41,15 @@ keywords:
 - sociologie
 - sport
 - ya
+acqui_type:
+- ''
+- Achat
+- Cadeau
+- Emprunt
+acqui_state:
+- ''
+- Neuf
+- Occasion
 langue_vo:
 - ''
 - Allemand

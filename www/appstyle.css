@@ -123,6 +123,7 @@ h2 {
   text-align: center;
   font-family: Powerpuff;
   font-size: 45px;
+  margin-bottom: 0px;
 }
 
 /*input[type="checkbox"], input[type="radio"] {
@@ -130,13 +131,16 @@ h2 {
 }*/
 
 .error {
-  color: red;
+  color: #E44853;
 }
 
 .success {
-  color: green;
+  color: var(--theme_colour);
 }
 
+.modal-sm {
+    text-align: center;
+}
 
 #side-panel {
   margin-top: 15px;
@@ -147,6 +151,8 @@ h2 {
 #side-panel .well {
     margin-right: 15px;
     /*padding-bottom: 31px;*/
+    width: 304px;
+    max-width: 100%;
 }
 
 #isbn-label {
@@ -178,6 +184,8 @@ div[data-value=ajouter] > div.container-fluid {
 #imageDiv, #edit_imageDiv {
     text-align: center;
     padding-left: 7px;
+    width: 300px;
+    max-width: 100%;
 }
 
 /*#imageSubDiv, #edit_imageSubDiv {
@@ -392,13 +400,18 @@ div[data-value=stats] .tab-content {
     margin-top: 15px;
 }
 
+
+.gt_table {
+    width: 100% !important;
+}
+
 #select_cat_row {
     margin-bottom: 25px;
 }
 
-#select_cat_row .shiny-input-container {
+#select_cat_col1 .shiny-input-container {
 /*div[data-value=stats_bycat] .shiny-input-container {*/
-    margin: 15px auto;
+    margin: 0px auto;
 }
 
 #cat_onlyread .shiny-options-group {
@@ -409,6 +422,17 @@ div[data-value=stats] .tab-content {
 #cat_read_date, #set_cat_row .awesome-checkbox {
     margin-left: 35px;
 }
+
+#stat_cat_fmt {
+    display: inline-block;
+}
+
+#select_cat_col2 div:nth-child(2) {
+    float: right;
+}
+
+
+
 
 #minpagesImage, #maxpagesImage {
     text-align: center;
