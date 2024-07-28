@@ -39,7 +39,7 @@ theme_set(theme_minimal())
 
 
 # Initialisation ----
-source("fonctions.R", local = T)
+# source("fonctions.R", local = T)
 source("init_app.R", local = T)
 
 # UI ----
@@ -84,7 +84,7 @@ ui <- fluidPage(
 server <- function(input, output, session) {
     shinyjs::runjs("localStorage.clear();")
 
-    active_user <- reactiveValues(username = NULL)
+    active_user <- "ego"
 
     # Base, choix proposés et choix par défaut
     values <- reactiveValues(
@@ -96,10 +96,13 @@ server <- function(input, output, session) {
     )
 
     ## Connexion et inscription ----
-    source(file = "server/signin_server.R", local = T)$value
+    # source(file = "server/signin_server.R", local = T)$value
 
     ## Inscription ----
-    source(file = "server/signup_server.R", local = T)$value
+    # source(file = "server/signup_server.R", local = T)$value
+
+    # Initialisation utilisateur·ice ----
+    source(file = "init_user.R", local = T)$value
 
     ## Ajouter ----
     source(file = "server/add_tab_server.R", local = T)$value

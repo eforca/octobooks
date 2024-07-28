@@ -1,5 +1,5 @@
 # Chemins d'accès ----
-user_path <<- function(path) file.path("users", active_user$username, path)
+user_path <<- function(path) file.path("users", active_user, path)
 
 if (!file.exists("users")) dir.create("users")
 if (!file.exists(user_path(""))) dir.create(user_path(""))
@@ -10,47 +10,55 @@ if (!file.exists(user_path(""))) dir.create(user_path(""))
 # Vérification de l'existence de la base
 if (!file.exists(user_path("data"))) dir.create(user_path("data"))
 if (!file.exists(user_path("data/octobooks.csv"))) {
-    fwrite(data.table(isbn = character(),
-                      title = character(),
-                      title_vo = character(),
-                      authors = character(),
-                      translators = character(),
-                      interpreters = character(),
-                      genders = character(),
-                      genre = character(),
-                      pub_date = integer(),
-                      edition_date = integer(),
-                      langue_vo = character(),
-                      pays_vo = character(),
-                      langue = character(),
-                      acqui_type = character(),
-                      acqui_date = integer(),
-                      acqui_state = character(),
-                      format = character(),
-                      pages = integer(),
-                      duree_h = integer(),
-                      duree_min = integer(),
-                      owner = character(),
-                      read = character(),
-                      read_deb_date = POSIXct(),
-                      read_fin_date = POSIXct(),
-                      keywords = character(), 
-                      cover = logical(),
-                      score = character(),
-                      onmyshelf = logical(), 
-                      signed = logical()),
-           user_path("data/octobooks.csv"))
+    fwrite(
+        data.table(
+            isbn = character(),
+            title = character(),
+            title_vo = character(),
+            authors = character(),
+            translators = character(),
+            interpreters = character(),
+            genders = character(),
+            genre = character(),
+            pub_date = integer(),
+            edition_date = integer(),
+            langue_vo = character(),
+            pays_vo = character(),
+            langue = character(),
+            acqui_type = character(),
+            acqui_date = integer(),
+            acqui_state = character(),
+            format = character(),
+            pages = integer(),
+            duree_h = integer(),
+            duree_min = integer(),
+            owner = character(),
+            read = character(),
+            read_deb_date = POSIXct(),
+            read_fin_date = POSIXct(),
+            keywords = character(),
+            cover = logical(),
+            score = character(),
+            onmyshelf = logical(),
+            signed = logical()
+        ),
+        user_path("data/octobooks.csv")
+    )
 }
 
 # Sauvegarde de la base si nécessaire
 if (!file.exists(user_path("data/backups"))) dir.create(user_path("data/backups"))
-lastsave <- paste0(user_path("data/backups/"), 
-                   sort(list.files(user_path("data/backups")), decreasing = TRUE)[1])
-if (lastsave == user_path("data/backups/NA") || 
+lastsave <- paste0(
+    user_path("data/backups/"),
+    sort(list.files(user_path("data/backups")), decreasing = TRUE)[1]
+)
+if (lastsave == user_path("data/backups/NA") ||
     md5sum(user_path("data/octobooks.csv")) != md5sum(lastsave)) {
     cat("New backup\n")
-    file.copy(from = user_path("data/octobooks.csv"), 
-              to = user_path(sprintf("data/backups/octobooks_%i.csv", as.integer(Sys.time()))))
+    file.copy(
+        from = user_path("data/octobooks.csv"),
+        to = user_path(sprintf("data/backups/octobooks_%i.csv", as.integer(Sys.time())))
+    )
 }
 
 
@@ -58,18 +66,25 @@ if (lastsave == user_path("data/backups/NA") ||
 # as.POSIXct(n, origin = "1970-01-01")
 
 # Importation de la base
-books <- fread(user_path("data/octobooks.csv"), 
-               integer64 = "character",
-               colClasses = list(character=c("title", "title_vo", 
-                                             "authors", "translators", "interpreters",
-                                             "genders", "genre", "langue_vo", 
-                                             "pays_vo", "langue", "format",
-                                             "acqui_type", "acqui_state",
-                                             "owner", "read", "keywords", "score"),
-                                 integer=c("pub_date", "edition_date", "acqui_date",
-                                           "pages", "duree_h", "duree_min"),
-                                 # POSIXct=c("read_deb_date", "read_fin_date"),
-                                 logical=c("cover", "onmyshelf", "signed")))
+books <- fread(user_path("data/octobooks.csv"),
+    integer64 = "character",
+    colClasses = list(
+        character = c(
+            "title", "title_vo",
+            "authors", "translators", "interpreters",
+            "genders", "genre", "langue_vo",
+            "pays_vo", "langue", "format",
+            "acqui_type", "acqui_state",
+            "owner", "read", "keywords", "score"
+        ),
+        integer = c(
+            "pub_date", "edition_date", "acqui_date",
+            "pages", "duree_h", "duree_min"
+        ),
+        # POSIXct=c("read_deb_date", "read_fin_date"),
+        logical = c("cover", "onmyshelf", "signed")
+    )
+)
 books[, c(char_cols[2:5]) := lapply(.SD, gsub, pattern = '""', replacement = '"'), .SDcols = char_cols[2:5]]
 books[, read_deb_date := as.POSIXct(read_deb_date, tz = "GMT")]
 books[, read_fin_date := as.POSIXct(read_fin_date, tz = "GMT")]
@@ -87,22 +102,22 @@ file.copy(list.files(user_path("data/covers"), full.names = TRUE), "www/covers")
 
 # # Suppression des fichiers images temporaires si nécessaires
 # if (length(grep("temp_cover", list.files(path = "www/covers/")))) {
-#     file.remove(paste0("www/covers/", 
+#     file.remove(paste0("www/covers/",
 #                        grep("temp_cover", list.files(path = "www/covers/"), value = T)))
 # }
-# 
+#
 # # Backup des images de couverture
 # if (!file.exists("data/covers")) dir.create("data/covers")
 # sapply(setdiff(list.files("www/covers/"), list.files("data/covers/")),
-#        function(f) file.copy(sprintf("www/covers/%s", f), sprintf("data/covers/%s", f))) %>% 
+#        function(f) file.copy(sprintf("www/covers/%s", f), sprintf("data/covers/%s", f))) %>%
 #     invisible
 
 
 
 
 # setcolorder(books, neworder = c("isbn", "title", "authors", "translators", "interpreters",
-#                                 "genders", "genre", "pub_date", "edition_date", "langue_vo", 
-#                                 "pays_vo", "langue", "format", "pages", "duree_h", "duree_min", 
+#                                 "genders", "genre", "pub_date", "edition_date", "langue_vo",
+#                                 "pays_vo", "langue", "format", "pages", "duree_h", "duree_min",
 #                                 "owner", "read", "read_deb_date", "read_fin_date", "keywords", "cover"))
 
 # Config ----
@@ -127,12 +142,15 @@ values$choices <- user_config$choices
 values$default_choices <- user_config$default_choices
 values$settings <- user_config$settings
 
-updateColorPickr(session, "set_themeColour", 
-                 value = values$settings$themeColour)
+observe({
+    updateColorPickr(session, "set_themeColour",
+        value = values$settings$themeColour
+    )
 
-for(i in 1:6) {
-    updateAwesomeCheckboxGroup(session,
-                               paste0("selcols", i),
-                               selected = values$selected_cols)
-}
-
+    for (i in 1:6) {
+        updateAwesomeCheckboxGroup(session,
+            paste0("selcols", i),
+            selected = values$selected_cols
+        )
+    }
+})
