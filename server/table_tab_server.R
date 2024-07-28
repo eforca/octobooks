@@ -406,10 +406,12 @@ observeEvent(input$edit_button, {
     
     if (length(input$books_tbl_rows_selected) == 1) {
         
-        req(values$books_df)
         entry_form("submit_edit")
         
         book_values <- values$books_df[input$books_tbl_rows_selected,]
+        
+        message(book_values$title)
+        message(is.null(input$edit_title))
         
         updateTextInput(session, "edit_isbn", value = book_values$isbn)
         updateCheckboxGroupButtons(session, "edit_onmyshelf", selected = book_values$onmyshelf)
@@ -498,6 +500,8 @@ observeEvent(input$edit_button, {
         
         update_edit_coverImage()
     }
+    
+    message(is.null(input$edit_title))
 })
 
 ### Format titre original ----
@@ -577,7 +581,9 @@ update_edit_coverImage <- function() {
     shinyjs::runjs(
         sprintf("
                     var edit_cover = document.getElementById('edit_coverImage');
-                    edit_cover.setAttribute('src', '%s');
+                    if (edit_cover !== null) {
+                        edit_cover.setAttribute('src', '%s');
+                    }
                     ", 
                 sprintf("%s?%i", gsub("www/", "", edit_coverImg()), as.integer(Sys.time())))
     )
