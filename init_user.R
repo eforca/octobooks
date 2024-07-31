@@ -133,6 +133,23 @@ user_config <<- sapply(config_files, function(f) {
     read_yaml(user_path(fpath))
 })
 
+# Récupération de tous les choix présents dans le tableau de données
+for (x in names(user_config$choices)) {
+    books_choices <- unique(books[[x]])
+    if (length(books_choices) > 1 || !is.na(books_choices)) {
+        if (x == "keywords") {
+            books_keywords <- unlist(strsplit(books_choices, ";"))
+            if (length(setdiff(books_keywords, user_config$choices$keywords))) {
+                user_config$choices$keywords <- unique(books_keywords)
+            }
+        } else {
+            if (length(setdiff(books_choices, user_config$choices[[x]]))) {
+                user_config$choices[[x]] <- books_choices
+            }
+        }
+    }
+}
+
 # Reactive values ----
 
 # Base, choix proposés et choix par défaut
