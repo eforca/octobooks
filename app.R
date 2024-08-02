@@ -38,10 +38,18 @@ suppressPackageStartupMessages({
 
 theme_set(theme_minimal())
 
+serv_type <- "local"
 
 # Initialisation ----
 # source("fonctions.R", local = T)
 source("init_app.R", local = T)
+
+# Initialisation utilisateur·ice local ----
+if (serv_type == "local" && file.exists("users/ego/config/settings.yml")) {
+    theme_colour <- read_yaml("users/ego/config/settings.yml")$settings$themeColour
+} else {
+    theme_colour <- config$settings$themeColour
+}
 
 # UI ----
 ui <- fluidPage(
@@ -56,7 +64,7 @@ ui <- fluidPage(
     ),
     tags$script(src = "appscript.js"),
     tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "appstyle.css")),
-    tags$head(tags$style(HTML(sprintf(":root { --theme_colour: %s; }", config$settings$themeColour)))),
+    tags$head(tags$style(HTML(sprintf(":root { --theme_colour: %s; }", theme_colour)))),
 
     # Application title
     titlePanel("Octobooks"),
@@ -85,8 +93,6 @@ ui <- fluidPage(
 server <- function(input, output, session) {
     shinyjs::runjs("localStorage.clear();")
 
-    active_user <- "ego"
-
     # Base, choix proposés et choix par défaut
     values <- reactiveValues(
         books_df = NULL,
@@ -103,6 +109,11 @@ server <- function(input, output, session) {
     # source(file = "server/signup_server.R", local = T)$value
 
     # Initialisation utilisateur·ice ----
+    if (serv_type == "local") {
+        active_user <- "ego"
+    } else {
+        active_user <- reactiveValues(username = NULL)
+    }
     source(file = "init_user.R", local = T)$value
 
     ## Ajouter ----
