@@ -29,6 +29,7 @@ suppressPackageStartupMessages({
     library(ggpattern)
     library(ggrepel)
     library(gt)
+    library(colorspace)
 
     library(RPostgres)
     library(DBI)

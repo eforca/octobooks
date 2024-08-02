@@ -219,6 +219,8 @@ fmt_dtplot <- function(d, sel_cat) {
                 id.vars = "year",
                 variable.name = sel_cat, value.name = "N"
             )
+    } else if (sel_cat == "score") {
+        dtplot <- d[, year := format(read_fin_date, "%Y")][read != "non"][, .N, keyby = c("year", sel_cat)]
     } else {
         dtplot <- d[, year := format(read_fin_date, "%Y")][read != "oui", year := "Non lu"][, .N, keyby = c("year", sel_cat)]
     }
@@ -235,9 +237,14 @@ observeEvent(input$stat_cat, {
     }
 
     reac_dtplot(fmt_dtplot(copy(values$books_df), input$stat_cat))
+
     updatePickerInput(session, "stat_cat_choices",
         choices = reac_dtplot()[year == "Total", sel_cat],
         selected = reac_dtplot()[year == "Total", sel_cat][1:8]
+    )
+    updatePickerInput(session, "stat_cat_year",
+        choices = reac_dtplot()[year != "Total", unique(year)],
+        selected = reac_dtplot()[year != "Total", unique(year)][1:9]
     )
 })
 
@@ -268,7 +275,18 @@ output$cat_table <- render_gt({
         )
     }
 
-    dtplot[order(N), .(sel_cat, N, p)] %>%
+    if (sel_cat == "score") {
+        dtplot[, sel_cat := factor(
+            sel_cat,
+            levels = c("", 0:5, "*", "Total"),
+            labels = c("Non noté", 0:5, "★", "Total")
+        )]
+        dtplot <- dtplot[order(sel_cat), .(sel_cat, N, p)]
+    } else {
+        dtplot <- dtplot[order(N), .(sel_cat, N, p)]
+    }
+
+    dtplot %>%
         gt() %>%
         tab_options(
             table.font.size = px(14),
@@ -312,7 +330,16 @@ output$cat_plot <- renderPlot({
         ]
     )
 
-    if (!length(input$stat_cat_choices)) {
+    if (sel_cat == "score") {
+        hclcol <- plotwidgets::col2hsl(values$settings$themeColour)
+        pal <- sequential_hcl(
+            7,
+            h = hclcol[1],
+            c = hclcol[2] * 100,
+            l = c(hclcol[3] * 100, 95),
+            rev = TRUE, power = 1
+        )
+    } else if (!length(input$stat_cat_choices)) {
         pal <- pal_cats[9]
     } else if (dtplot[sel_cat == "Autre", .N]) {
         pal <- c(pal_cats[seq_along(input$stat_cat_choices)], pal_cats[9])
@@ -368,6 +395,45 @@ output$cat_plot <- renderPlot({
                 ),
                 position = position_dodge(width = 1),
                 size = 4.5
+            ) +
+            facet_wrap(~year, nrow = fifelse(nyears <= 5, 1, 2)) +
+            theme_void() +
+            theme(text = element_text(size = 16))
+    } else if (sel_cat == "score") {
+        if (input$stat_cat_fmt == "p") {
+            dtplot[, labs := fifelse(p <= 0.05, "", paste0(round(p * 100)))]
+        } else {
+            dtplot[, labs := fifelse(p <= 0.05, "", as.character(N))]
+        }
+
+        dtplot %>%
+            merge(
+                expand.grid(year = unique(.$year), sel_cat = c(0:5, "*")),
+                all.y = TRUE
+            ) %>%
+            ggplot(aes(
+                x = "",
+                y = p,
+                fill = factor(sel_cat,
+                    levels = c(0:5, "*")
+                )
+            )) +
+            geom_bar(
+                stat = "identity",
+                width = 1,
+                position = position_dodge2(preserve = "single"),
+                na.rm = TRUE
+            ) +
+            scale_fill_manual(
+                "",
+                values = pal,
+                labels = c(0:5, "★"),
+                drop = FALSE
+            ) +
+            geom_text(aes(label = labs, vjust = -0.25),
+                position = position_dodge2(width = 1),
+                size = 4.5,
+                na.rm = TRUE
             ) +
             facet_wrap(~year, nrow = fifelse(nyears <= 5, 1, 2)) +
             theme_void() +
