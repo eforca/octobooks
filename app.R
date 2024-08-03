@@ -7,7 +7,7 @@
 # Environment ----
 rm(list = ls())
 invisible(gc())
-options(encoding = "UTF-8", scipen = 999)
+options(encoding = "UTF-8", scipen = 999, browser = "/usr/bin/open -a 'Firefox'")
 
 # Packages ----
 suppressPackageStartupMessages({
@@ -133,4 +133,7 @@ server <- function(input, output, session) {
 }
 
 # Run the application
-shinyApp(ui = ui, server = server)
+shinyApp(
+    ui = ui, server = server,
+    options = list(launch.browser = TRUE)
+)
